@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(risc_vector)
 
+#set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # cpp standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -28,7 +30,7 @@ set(TESTDIR tests)
 
 # test executable
 add_executable(tests ${SRCS} ${TESTDIR}/tests.cc)
-target_link_libraries(tests PRIVATE Catch2::Catch2 PRIVATE Python3::Python)
+target_link_libraries(tests PRIVATE Catch2::Catch2WithMain PRIVATE Python3::Python)
 
 # test discovery
 include(CTest)
