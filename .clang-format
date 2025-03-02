@@ -1,0 +1,11 @@
+---
+Language: Cpp
+AlignAfterOpenBracket: AlwaysBreak
+AllowAllParametersOfDeclarationOnNextLine: true
+BinPackParameters: false
+BreakBeforeBraces: Linux
+PointerAlignment: Right
+ColumnLimit: 80
+IndentWidth: 4
+TabWidth: 4
+UseTab: Always

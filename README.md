@@ -1,12 +1,19 @@
 # Risc V[ECTOR]
 
+## dependencies
+- cmake
+- g++ (GCC) 11.4.0
+- python 3.10 or newer
+- catch2 version 3.5.3
+
 ## to compile
 Generate the build directory with
-`cmake -S . -B build`
-then
-`cmake --build build`
 
-## to test
+`cmake -S . -B build`
+
+then compile both the simulator and tests with
+
+`cmake --build build`
 
 # about
 

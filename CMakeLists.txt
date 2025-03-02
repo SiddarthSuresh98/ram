@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(risc_vector)
 
-#set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # cpp standard
 set(CMAKE_CXX_STANDARD 17)

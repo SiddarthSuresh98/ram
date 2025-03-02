@@ -1,6 +1,8 @@
 # IDE
 /.dir-locals.el
 /manifest.scm
+/.ccls-cache
+/compile_commands.json
 
 # generated
 __pycache__
