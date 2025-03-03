@@ -16,20 +16,22 @@ include_directories(
 
 # gather source files
 file(GLOB_RECURSE SRCS "src/*.cc")
-list(REMOVE_ITEM SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/rv.cc")
+list(REMOVE_ITEM SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cc")
 
 # find python3 components
 find_package(Python3 COMPONENTS Development REQUIRED)
 
 # binary executable
-add_executable(${PROJECT_NAME} ${SRCS} src/rv.cc)
+add_executable(${PROJECT_NAME} ${SRCS} src/main.cc)
 target_link_libraries(${PROJECT_NAME} PRIVATE Python3::Python)
 
 find_package(Catch2 REQUIRED)
-set(TESTDIR tests)
+
+#gather test files
+file(GLOB_RECURSE TESTS "tests/*.cc")
 
 # test executable
-add_executable(tests ${SRCS} ${TESTDIR}/tests.cc)
+add_executable(tests ${SRCS} ${TESTS})
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain PRIVATE Python3::Python)
 
 # test discovery
