@@ -4,7 +4,7 @@
 #include <regex>
 #include <sstream>
 
-TEST_CASE("Logger logs higher log level")
+TEST_CASE("Logger logs higher log level", "[logger]")
 {
 	std::streambuf *coutBuffer = std::cout.rdbuf();
 	std::ostringstream oss;
@@ -25,7 +25,7 @@ TEST_CASE("Logger logs higher log level")
 	REQUIRE(std::regex_match(actual, expected));
 }
 
-TEST_CASE("Logger logs equal log level")
+TEST_CASE("Logger logs equal log level", "[logger]")
 {
 	std::streambuf *coutBuffer = std::cout.rdbuf();
 	std::ostringstream oss;
@@ -45,7 +45,7 @@ TEST_CASE("Logger logs equal log level")
 	REQUIRE(std::regex_match(actual, expected));
 }
 
-TEST_CASE("Logger ignores lower log level")
+TEST_CASE("Logger ignores lower log level", "[logger]")
 {
 	std::streambuf *coutBuffer = std::cout.rdbuf();
 	std::ostringstream oss;
