@@ -24,9 +24,9 @@ void Storage::do_write(signed data, int address)
 void Storage::resolve()
 {
 	if (this->wait_time == 0) {
-		this->deque.pop_front();
+		this->requester = IDLE;
 		this->wait_time = delay;
-	} else if (!this->deque.empty()) {
+	} else if (this->requester != IDLE) {
 		--this->wait_time;
 	}
 }

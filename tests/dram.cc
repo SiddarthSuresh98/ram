@@ -188,51 +188,6 @@ TEST_CASE(
 	delete d;
 }
 
-TEST_CASE("Many conflicting requests first-come first serve", "[dram]")
-{
-	int delay = 1;
-	Dram *d = new Dram(1, delay);
-	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
-	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
-	CHECK(expected == actual);
-
-	signed int w = 0x11223344;
-
-	Response r;
-	r = d->write(FETCH, w, 0x00000000);
-	r = d->write(MEM, w, 0x00000001);
-
-	actual = d->view(0, 1)[0];
-	REQUIRE(expected == actual);
-	d->resolve();
-
-	r = d->write(FETCH, w, 0x00000000);
-	r = d->write(L1CACHE, w, 0x00000002);
-	// call mem after cache
-	r = d->write(MEM, w, 0x00000001);
-
-	expected.at(0) = w;
-	actual = d->view(0, 1)[0];
-	REQUIRE(expected == actual);
-	d->resolve();
-
-	r = d->write(MEM, w, 0x00000001);
-	r = d->write(L1CACHE, w, 0x00000002);
-
-	actual = d->view(0, 1)[0];
-	REQUIRE(expected == actual);
-	d->resolve();
-
-	r = d->write(MEM, w, 0x00000001);
-	r = d->write(L1CACHE, w, 0x00000002);
-
-	expected.at(1) = w;
-	actual = d->view(0, 1)[0];
-	REQUIRE(expected == actual);
-
-	delete d;
-}
-
 TEST_CASE("Sidedoor bypasses delay", "[dram]")
 {
 	int delay = 3;

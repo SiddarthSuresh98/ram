@@ -23,9 +23,10 @@ Response Dram::write(Accessor accessor, signed int data, int address)
 		r = OK;
 	} else {
 		/* Do this first--then process the first cycle immediately. */
-		this->deque.push_back(accessor);
+		if (this->requester == IDLE)
+			this->requester = accessor;
 
-		if (this->deque.front() == accessor) {
+		if (this->requester == accessor) {
 			if (this->wait_time == 0) {
 				this->do_write(data, address);
 				r = OK;

@@ -4,31 +4,14 @@
 #include "response.h"
 #include <algorithm>
 #include <array>
-#include <deque>
 #include <vector>
 
 enum Accessor {
+	IDLE,
 	MEM,
 	FETCH,
 	L1CACHE,
 	SIDE,
-};
-
-/**
- * Wrapper class for std::deque.
- *
- * Implements a deque that does not push duplicate objects.
- */
-template <typename T> class Deque : public std::deque<T>
-{
-  public:
-	using std::deque<T>::deque;
-
-	void push_back(const T &value)
-	{
-		if (std::find(this->begin(), this->end(), value) == this->end())
-			std::deque<T>::push_back(value);
-	}
 };
 
 class Storage
@@ -83,9 +66,9 @@ class Storage
 	 */
 	int delay;
 	/**
-	 * The accessors currently being serviced, in first come first serve order.
+	 * The accessor currently being serviced.
 	 */
-	Deque<enum Accessor> deque;
+	enum Accessor requester;
 	/**
 	 * The number of cycles until the current request is completed.
 	 */
