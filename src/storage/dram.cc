@@ -2,7 +2,6 @@
 #include "definitions.h"
 #include "response.h"
 #include <algorithm>
-#include <iostream>
 
 Dram::Dram(int lines, int delay)
 {

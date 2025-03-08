@@ -26,7 +26,7 @@ void Storage::resolve()
 	if (this->wait_time == 0) {
 		this->deque.pop_front();
 		this->wait_time = delay;
-	} else {
+	} else if (!this->deque.empty()) {
 		--this->wait_time;
 	}
 }
