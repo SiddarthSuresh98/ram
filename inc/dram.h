@@ -19,10 +19,7 @@ class Dram : public Storage
 	Response read(Accessor accessor, int address, std::array<signed int, LINE_SIZE>& data) override;
 
 	private:
-	void do_read(std::array<signed int, LINE_SIZE>& data_line, int address){
-		int line = address / LINE_SIZE;
-		data_line = this->data->at(line);
-	}
+	void do_read(std::array<signed int, LINE_SIZE>& data_line, int address);
 };
 
 #endif /* DRAM_H_INCLUDED */
