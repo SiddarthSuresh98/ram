@@ -10,6 +10,7 @@ Dram::Dram(int lines, int delay)
 	this->delay = delay;
 	this->wait_time = this->delay;
 	this->lower = nullptr;
+	this->requester = IDLE;
 }
 
 Dram::~Dram() { delete this->data; }
