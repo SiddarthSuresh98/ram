@@ -32,7 +32,10 @@ class Storage
 	 * @return a status code reflecting the state of the request, and the
 	 * data being returned.
 	 */
-	virtual Response read(Accessor accessor, int address, std::array<signed int, LINE_SIZE>& data) = 0;
+	virtual Response read(
+		Accessor accessor,
+		int address,
+		std::array<signed int, LINE_SIZE> &data) = 0;
 	/**
 	 * Sidedoor view of `lines` of memory starting at `base`.
 	 * @param The base line to start getting memory from.
@@ -47,10 +50,6 @@ class Storage
 	void resolve();
 
   protected:
-	/**
-	 * Helper for `write`.
-	 */
-	void do_write(signed int, int);
 	/**
 	 * The data currently stored in this level of storage.
 	 */
@@ -73,6 +72,11 @@ class Storage
 	 * The number of cycles until the current request is completed.
 	 */
 	int wait_time;
+	/**
+	 * A flag indicating whether this level of storage is currently blocked by a
+	 * lower level.
+	 */
+	int is_blocked;
 };
 
 #endif /* STORAGE_H_INCLUDED */

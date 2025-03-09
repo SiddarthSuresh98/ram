@@ -13,20 +13,12 @@ Storage::view(int base, int lines)
 	return ret;
 }
 
-void Storage::do_write(signed data, int address)
-{
-	int line = address / LINE_SIZE;
-	int word = address % LINE_SIZE;
-
-	this->data->at(line).at(word) = data;
-}
-
 void Storage::resolve()
 {
 	if (this->wait_time == 0) {
 		this->requester = IDLE;
 		this->wait_time = delay;
-	} else if (this->requester != IDLE) {
+	} else if (this->requester != IDLE && !this->is_blocked) {
 		--this->wait_time;
 	}
 }

@@ -24,8 +24,9 @@ Response Cache::write(Accessor accessor, signed int data, int address)
 		this->requester = accessor;
 
 	if (this->requester == accessor) {
+		fetch_resource(address);
 		if (this->wait_time == 0) {
-			this->do_write(data, address);
+			// this->do_write(data, address);
 			r = OK;
 		}
 	}
@@ -34,3 +35,7 @@ Response Cache::write(Accessor accessor, signed int data, int address)
 }
 
 Response Cache::read(Accessor accessor, int address, std::array<signed int, LINE_SIZE>& data) { return WAIT; }
+
+void Cache::fetch_resource(int address) {
+
+}

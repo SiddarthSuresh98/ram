@@ -15,6 +15,14 @@ Dram::Dram(int lines, int delay)
 
 Dram::~Dram() { delete this->data; }
 
+void Dram::do_write(signed data, int address)
+{
+	int line = address / LINE_SIZE;
+	int word = address % LINE_SIZE;
+
+	this->data->at(line).at(word) = data;
+}
+
 Response Dram::write(Accessor accessor, signed int data, int address)
 {
 	Response r = WAIT;
