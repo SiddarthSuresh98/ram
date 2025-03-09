@@ -6,17 +6,31 @@
 Cache::Cache(int lines, Storage *lower, int delay)
 {
 	this->data = new std::vector<std::array<signed int, LINE_SIZE>>;
-	this->data->resize(lines);
+	this->data->resize(L1_CACHE_SIZE);
 	this->lower = lower;
 	this->delay = delay;
-	this->lower = nullptr;
+	for (int i = 0; i < L1_CACHE_SIZE; ++i)
+		this->stat[i] = 0b01;
 }
 
 Cache::~Cache() { delete this->data; }
 
 Response Cache::write(Accessor accessor, signed int data, int address)
 {
-	return WAIT;
+	Response r = WAIT;
+
+	/* Do this first--then process the first cycle immediately. */
+	if (this->requester == IDLE)
+		this->requester = accessor;
+
+	if (this->requester == accessor) {
+		if (this->wait_time == 0) {
+			this->do_write(data, address);
+			r = OK;
+		}
+	}
+
+	return r;
 }
 
 Response Cache::read(Accessor accessor, int address) { return WAIT; }

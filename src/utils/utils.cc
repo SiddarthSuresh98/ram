@@ -1,5 +1,5 @@
-#include "definitions.h"
 #include "utils.h"
+#include "definitions.h"
 
 void get_bit_fields(int address, int *tag, int *index, int *offset)
 {
