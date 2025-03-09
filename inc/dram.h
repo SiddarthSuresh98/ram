@@ -16,7 +16,10 @@ class Dram : public Storage
 	~Dram();
 
 	Response write(Accessor accessor, signed int data, int address) override;
-	Response read(Accessor accessor, int address) override;
+	Response read(Accessor accessor, int address, std::array<signed int, LINE_SIZE>& data) override;
+
+	private:
+	void do_read(std::array<signed int, LINE_SIZE>& data_line, int address);
 };
 
 #endif /* DRAM_H_INCLUDED */
