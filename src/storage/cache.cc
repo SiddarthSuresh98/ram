@@ -19,4 +19,4 @@ Response Cache::write(Accessor accessor, signed int data, int address)
 	return WAIT;
 }
 
-Response Cache::read(Accessor accessor, int address) { return WAIT; }
+Response Cache::read(Accessor accessor, int address, std::array<signed int, LINE_SIZE>& data) { return WAIT; }
