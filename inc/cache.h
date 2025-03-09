@@ -8,7 +8,7 @@ class Cache : public Storage
 	/**
 	 * Constructor.
 	 * @param The number of `lines` contained in memory. The total number of
-	 * words is this number multiplied by 4.
+	 * words is this number multiplied by LINE_SIZE.
 	 * @param The next lowest level in storage. Methods from this object are
 	 * called in case of a cache miss.
 	 * @param The number of clock cycles each access takes.
@@ -17,9 +17,8 @@ class Cache : public Storage
 	Cache(int lines, Storage *lower, int delay);
 	~Cache();
 
-	Response *write(Accessor accessor, signed int data, int address) override;
-	Response *read(Accessor accessor, int address) override;
-	int **view(int base, int lines) override;
+	Response write(Accessor accessor, signed int data, int address) override;
+	Response read(Accessor accessor, int address) override;
 };
 
 #endif /* CACHE_H_INCLUDED */
