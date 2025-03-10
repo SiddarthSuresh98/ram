@@ -19,7 +19,15 @@ class Dram : public Storage
 	Response read(Accessor accessor, int address, std::array<signed int, LINE_SIZE>& data) override;
 
 	private:
+	/**
+	 * Helper for `write`.
+	 */
+	void do_write(signed int, int);
+	/**
+	 * Helper for `read`.
+	 */
 	void do_read(std::array<signed int, LINE_SIZE>& data_line, int address);
 };
 
 #endif /* DRAM_H_INCLUDED */
+

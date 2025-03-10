@@ -1,6 +1,8 @@
 #ifndef CACHE_H
 #define CACHE_H
-#include <storage.h>
+#include "definitions.h"
+#include "storage.h"
+#include <array>
 
 class Cache : public Storage
 {
@@ -14,11 +16,30 @@ class Cache : public Storage
 	 * @param The number of clock cycles each access takes.
 	 * @return A new cache object.
 	 */
-	Cache(int lines, Storage *lower, int delay);
+	Cache(Storage *lower, int delay);
 	~Cache();
 
 	Response write(Accessor accessor, signed int data, int address) override;
-	Response read(Accessor accessor, int address, std::array<signed int, LINE_SIZE>& data) override;
+	Response read(
+		Accessor accessor,
+		int address,
+		std::array<signed int, LINE_SIZE> &data) override;
+
+  private:
+	/**
+	 * Fetches `address` from a lower level of storage if it is not already
+	 * present. If it is not, temporarily sets the is_blocked attribute of this
+	 * cache level to true, and the victim line is chosen/written back.
+	 * @param the address that must be present in cache.
+	 */
+	void fetch_resource(int address);
+	/**
+	 * An array of metadata about elements in `data`.
+	 * If the first value of an element is negative, the corresponding
+	 * element in `data` is invalid. If the most second value of an element
+	 * is nonzero, the corresponding element in `data` is dirty.
+	 */
+	std::array<std::array<int, 2>, L1_CACHE_SIZE> meta;
 };
 
 #endif /* CACHE_H_INCLUDED */
