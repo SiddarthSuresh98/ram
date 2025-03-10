@@ -34,6 +34,7 @@ Response Cache::write(Accessor accessor, signed int data, int address)
 			int tag, index, offset;
 			get_bit_fields(address, &tag, &index, &offset);
 			this->data->at(index).at(offset) = data;
+			this->meta[index].at(1) = 1;
 			r = OK;
 		}
 	}
@@ -52,22 +53,24 @@ void Cache::fetch_resource(int expected)
 	Response r = OK;
 	int tag, index, offset;
 	std::array<signed int, LINE_SIZE> actual;
-	std::array<int, 2> meta;
+	std::array<int, 2> *meta;
 
 	get_bit_fields(expected, &tag, &index, &offset);
-	meta = this->meta.at(index);
+	meta = &this->meta.at(index);
 
-	if (this->meta[index][0] != tag) {
+	if (meta->at(0) != tag) {
 		// address not in cache
-		if (this->meta[index][1] >= 0) {
+		if (meta->at(1) >= 0) {
 			// occupant is dirty
 			// TODO
 			r = WAIT;
 		} else {
 			actual = this->data->at(index);
 			r = this->lower->read(L1CACHE, expected, actual);
-			// clear dirty bit and set tag?
-			
+			if (r == OK) {
+				meta->at(0) = tag;
+				meta->at(1) = -1;
+			}
 		}
 	}
 
