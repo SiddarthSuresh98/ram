@@ -8,9 +8,10 @@ Dram::Dram(int lines, int delay)
 	this->data = new std::vector<std::array<signed int, LINE_SIZE>>;
 	this->data->resize(lines);
 	this->delay = delay;
-	this->wait_time = this->delay;
+	this->is_waiting = false;
 	this->lower = nullptr;
 	this->requester = IDLE;
+	this->wait_time = this->delay;
 }
 
 Dram::~Dram() { delete this->data; }
