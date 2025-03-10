@@ -25,7 +25,7 @@ TEST_CASE("no delay stores instantly", "[cache]")
 
 	Response r;
 
-	r = c->write(MEM, w, 0x0000000000000);
+	r = c->write(MEM, w, 0b0);
 	CHECK(r == OK);
 	d->resolve();
 	c->resolve();
@@ -56,7 +56,7 @@ TEST_CASE("cache takes \"forever\"", "[cache]")
 	int i;
 	Response r;
 	for (i = 0; i < delay + 2; ++i) {
-		r = c->write(MEM, w, 0x0000000000000);
+		r = c->write(MEM, w, 0b0);
 		CHECK(r == WAIT); // WAIT
 
 		actual = c->view(0, 1)[0];
@@ -65,7 +65,7 @@ TEST_CASE("cache takes \"forever\"", "[cache]")
 		d->resolve();
 	}
 
-	r = c->write(MEM, w, 0x0000000000000);
+	r = c->write(MEM, w, 0b0);
 	CHECK(r == OK);
 	d->resolve();
 
@@ -95,7 +95,7 @@ TEST_CASE("dram takes \"forever\"", "[cache]")
 	int i;
 	Response r;
 	for (i = 0; i < delay + 2; ++i) {
-		r = c->write(MEM, w, 0x0000000000000);
+		r = c->write(MEM, w, 0b0);
 		CHECK(r == BLOCKED); // BLOCKED
 
 		actual = c->view(0, 1)[0];
@@ -104,7 +104,7 @@ TEST_CASE("dram takes \"forever\"", "[cache]")
 		d->resolve();
 	}
 
-	r = c->write(MEM, w, 0x0000000000000);
+	r = c->write(MEM, w, 0b0);
 	CHECK(r == OK);
 	d->resolve();
 
@@ -134,7 +134,7 @@ TEST_CASE("dram and cache take \"forever\"", "[cache]")
 	int i;
 	Response r;
 	for (i = 0; i < delay + 2; ++i) {
-		r = c->write(MEM, w, 0x0000000000000);
+		r = c->write(MEM, w, 0b0);
 		CHECK(r == BLOCKED); // BLOCKED
 
 		actual = c->view(0, 1)[0];
@@ -144,7 +144,7 @@ TEST_CASE("dram and cache take \"forever\"", "[cache]")
 	}
 
 	for (i = 0; i < delay; ++i) {
-		r = c->write(MEM, w, 0x0000000000000);
+		r = c->write(MEM, w, 0b0);
 		CHECK(r == WAIT); // WAIT
 
 		actual = c->view(0, 1)[0];
@@ -153,7 +153,7 @@ TEST_CASE("dram and cache take \"forever\"", "[cache]")
 		d->resolve();
 	}
 
-	r = c->write(MEM, w, 0x0000000000000);
+	r = c->write(MEM, w, 0b0);
 	CHECK(r == OK);
 	c->resolve();
 	d->resolve();
@@ -184,10 +184,10 @@ TEST_CASE("dram takes \"forever\", two concurrent requests same index", "[cache]
 	int i;
 	Response r;
 	for (i = 0; i < delay + 2; ++i) {
-		r = c->write(MEM, w, 0x0000000000000);
+		r = c->write(MEM, w, 0b0);
 		CHECK(r == BLOCKED); // BLOCKED
 
-		r = c->write(FETCH, w, 0x0000000000001);
+		r = c->write(FETCH, w, 0b1);
 		CHECK(r == WAIT); // WAIT
 
 		actual = c->view(0, 1)[0];
@@ -196,9 +196,9 @@ TEST_CASE("dram takes \"forever\", two concurrent requests same index", "[cache]
 		d->resolve();
 	}
 
-	r = c->write(MEM, w, 0x0000000000000);
+	r = c->write(MEM, w, 0b0);
 	CHECK(r == OK);
-	r = c->write(FETCH, w, 0x0000000000001);
+	r = c->write(FETCH, w, 0b1);
 	CHECK(r == WAIT);
 
 	c->resolve();
@@ -212,7 +212,7 @@ TEST_CASE("dram takes \"forever\", two concurrent requests same index", "[cache]
 	actual = c->view(0, 1)[0];
 	REQUIRE(expected == actual);
 
-	r = c->write(FETCH, w, 0x0000000000001);
+	r = c->write(FETCH, w, 0b1);
 	// this should have been loaded already!
 	CHECK(r == OK);
 
@@ -241,10 +241,10 @@ TEST_CASE("dram takes \"forever\", two concurrent requests different index", "[c
 	int i;
 	Response r;
 	for (i = 0; i < delay + 2; ++i) {
-		r = c->write(MEM, w, 0x0000000000000);
+		r = c->write(MEM, w, 0b0);
 		CHECK(r == BLOCKED); // BLOCKED
 
-		r = c->write(FETCH, w, 0x0000000000100);
+		r = c->write(FETCH, w, 0b100);
 		CHECK(r == WAIT); // WAIT
 
 		actual = c->view(0, 1)[0];
@@ -253,9 +253,9 @@ TEST_CASE("dram takes \"forever\", two concurrent requests different index", "[c
 		d->resolve();
 	}
 
-	r = c->write(MEM, w, 0x0000000000000);
+	r = c->write(MEM, w, 0b0);
 	CHECK(r == OK);
-	r = c->write(FETCH, w, 0x0000000000001);
+	r = c->write(FETCH, w, 0b1);
 	CHECK(r == WAIT);
 
 	c->resolve();
@@ -270,8 +270,8 @@ TEST_CASE("dram takes \"forever\", two concurrent requests different index", "[c
 	REQUIRE(expected == actual);
 
 	for (i = 0; i < delay + 2; ++i) {
-		r = c->write(FETCH, w, 0x0000000000100);
-		CHECK(r == BLOCKED); // WAIT
+		r = c->write(FETCH, w, 0b100);
+		CHECK(r == BLOCKED); // BLOCKED
 
 		actual = c->view(0, 1)[0];
 		REQUIRE(expected == actual);
@@ -279,7 +279,7 @@ TEST_CASE("dram takes \"forever\", two concurrent requests different index", "[c
 		d->resolve();
 	}
 
-	r = c->write(FETCH, w, 0x0000000000001);
+	r = c->write(FETCH, w, 0b1);
 	CHECK(r == OK);
 
 	c->resolve();
