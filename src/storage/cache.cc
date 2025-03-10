@@ -4,7 +4,7 @@
 #include "utils.h"
 #include <bits/stdc++.h>
 
-Cache::Cache(int lines, Storage *lower, int delay)
+Cache::Cache(Storage *lower, int delay)
 {
 	this->data = new std::vector<std::array<signed int, LINE_SIZE>>;
 	this->data->resize(L1_CACHE_SIZE);
@@ -28,6 +28,10 @@ Response Cache::write(Accessor accessor, signed int data, int address)
 		if (this->is_waiting == true)
 			r = BLOCKED;
 		else if (this->wait_time == 0) {
+			int tag, index, offset;
+			get_bit_fields(address, &tag, &index, &offset);
+			this->data->at(index).at(offset) = data;
+			
 			r = OK;
 		}
 	}
@@ -44,22 +48,23 @@ Response Cache::read(
 void Cache::fetch_resource(int expected)
 {
 	Response r = OK;
-	int etag, index, atag;
+	int etag, index, eoffset, atag;
 	std::array<signed int, LINE_SIZE> actual;
 	std::array<int, 2> meta;
 
-	get_bit_fields(expected, &etag, &index, nullptr);
+	get_bit_fields(expected, &etag, &index, &eoffset);
 	meta = this->meta.at(index);
 
 	if (atag != etag) {
 		// address not in cache
-		if (this->meta[index][0]) {
+		if (this->meta[index][0] >= 0) {
 			// occupant is dirty
 			// TODO
 			r = WAIT;
 		} else {
 			actual = this->data->at(index);
 			r = this->lower->read(L1CACHE, expected, actual);
+			// clear dirty bit and set tag?
 		}
 	}
 

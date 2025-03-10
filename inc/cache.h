@@ -3,7 +3,6 @@
 #include "definitions.h"
 #include "storage.h"
 #include <array>
-#include <bitset>
 
 class Cache : public Storage
 {
@@ -17,7 +16,7 @@ class Cache : public Storage
 	 * @param The number of clock cycles each access takes.
 	 * @return A new cache object.
 	 */
-	Cache(int lines, Storage *lower, int delay);
+	Cache(Storage *lower, int delay);
 	~Cache();
 
 	Response write(Accessor accessor, signed int data, int address) override;
