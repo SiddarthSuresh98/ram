@@ -17,6 +17,8 @@ Storage *Storage::get_lower() { return this->lower; }
 
 void Storage::resolve()
 {
+	if (this->lower)
+		this->lower->resolve();
 	if (this->wait_time == 0) {
 		this->requester = IDLE;
 		this->wait_time = delay;

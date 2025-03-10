@@ -1,18 +1,12 @@
 #ifndef STORAGE_H
 #define STORAGE_H
+#include "accessor.h"
 #include "definitions.h"
 #include "response.h"
 #include <algorithm>
 #include <array>
+#include <map>
 #include <vector>
-
-enum Accessor {
-	IDLE,
-	MEM,
-	FETCH,
-	L1CACHE,
-	SIDE,
-};
 
 class Storage
 {
@@ -45,9 +39,10 @@ class Storage
 	 * @return A matrix of data values, where each row is a line and each column
 	 * is a word.
 	 */
-	std::vector<std::array<signed int, LINE_SIZE>> view(int base, int lines) const;
+	std::vector<std::array<signed int, LINE_SIZE>>
+	view(int base, int lines) const;
 	/**
-	 * Advances to the next job if the current job is completed.
+	 * Refreshes the state of this storage device and lower.
 	 */
 	void resolve();
 

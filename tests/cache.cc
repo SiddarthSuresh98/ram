@@ -27,7 +27,6 @@ TEST_CASE("no delay stores instantly", "[cache]")
 
 	r = c->write(MEM, w, 0b0);
 	CHECK(r == OK);
-	d->resolve();
 	c->resolve();
 
 	actual = d->view(0, 1)[0];
@@ -61,12 +60,10 @@ TEST_CASE("cache takes \"forever\"", "[cache]")
 		actual = c->view(0, 1)[0];
 		REQUIRE(expected == actual);
 		c->resolve();
-		d->resolve();
 	}
 
 	r = c->write(MEM, w, 0b0);
 	CHECK(r == OK);
-	d->resolve();
 
 	actual = d->view(0, 1)[0];
 	// we do NOT write back now!
@@ -99,12 +96,10 @@ TEST_CASE("dram takes \"forever\"", "[cache]")
 		actual = c->view(0, 1)[0];
 		REQUIRE(expected == actual);
 		c->resolve();
-		d->resolve();
 	}
 
 	r = c->write(MEM, w, 0b0);
 	CHECK(r == OK);
-	d->resolve();
 
 	actual = d->view(0, 1)[0];
 	// we do NOT write back now!
@@ -137,7 +132,6 @@ TEST_CASE("dram and cache take \"forever\"", "[cache]")
 		actual = c->view(0, 1)[0];
 		REQUIRE(expected == actual);
 		c->resolve();
-		d->resolve();
 	}
 
 	for (i = 0; i < delay; ++i) {
@@ -147,13 +141,11 @@ TEST_CASE("dram and cache take \"forever\"", "[cache]")
 		actual = c->view(0, 1)[0];
 		REQUIRE(expected == actual);
 		c->resolve();
-		d->resolve();
 	}
 
 	r = c->write(MEM, w, 0b0);
 	CHECK(r == OK);
 	c->resolve();
-	d->resolve();
 
 	actual = d->view(0, 1)[0];
 	// we do NOT write back now!
@@ -190,7 +182,6 @@ TEST_CASE(
 		actual = c->view(0, 1)[0];
 		REQUIRE(expected == actual);
 		c->resolve();
-		d->resolve();
 	}
 
 	r = c->write(MEM, w, 0b0);
@@ -199,7 +190,6 @@ TEST_CASE(
 	CHECK(r == WAIT);
 
 	c->resolve();
-	d->resolve();
 
 	actual = d->view(0, 1)[0];
 	// we do NOT write back now!
@@ -214,7 +204,6 @@ TEST_CASE(
 	CHECK(r == OK);
 
 	c->resolve();
-	d->resolve();
 
 	expected.at(1) = w;
 	actual = c->view(0, 1)[0];
@@ -248,7 +237,6 @@ TEST_CASE(
 		actual = c->view(0, 1)[0];
 		REQUIRE(expected == actual);
 		c->resolve();
-		d->resolve();
 	}
 
 	r = c->write(MEM, w, 0b0);
@@ -257,7 +245,6 @@ TEST_CASE(
 	CHECK(r == WAIT);
 
 	c->resolve();
-	d->resolve();
 
 	actual = d->view(0, 1)[0];
 	// we do NOT write back now!
@@ -274,14 +261,12 @@ TEST_CASE(
 		actual = c->view(0, 1)[0];
 		REQUIRE(expected == actual);
 		c->resolve();
-		d->resolve();
 	}
 
 	r = c->write(FETCH, w, 0b1);
 	CHECK(r == OK);
 
 	c->resolve();
-	d->resolve();
 
 	expected.at(1) = w;
 	actual = c->view(0, 1)[0];

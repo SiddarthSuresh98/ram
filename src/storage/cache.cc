@@ -100,13 +100,11 @@ std::ostream &operator<<(std::ostream &os, const Cache &c)
 		c.view(0, L1_CACHE_SIZE);
 	std::array<std::array<int, 2>, L1_CACHE_SIZE> meta = c.get_meta();
 
-	os << std::setfill(' ') << std::setw(L1_CACHE_SPEC + 1) << " ADDRESS |"
-	   << std::setfill(' ') << std::setw(11) << "0" << std::setfill(' ')
-	   << std::setw(11) << "1" << std::setfill(' ') << std::setw(11) << "2"
-	   << std::setfill(' ') << std::setw(11) << "3"
-	   << " |" << std::setfill(' ')
-	   << std::setw(MEM_SPEC - LINE_SPEC - L1_CACHE_SPEC + 4) << "TAG "
-	   << "| D \n";
+	os << " " << std::setfill(' ') << std::setw(L1_CACHE_SPEC + 2) << "INDEX"
+	   << " | " << std::setfill(' ') << std::setw((8 + 3) * 4 - 1) << "DATA"
+	   << " | " << std::setfill(' ')
+	   << std::setw(MEM_SPEC - LINE_SPEC - L1_CACHE_SPEC + 2) << "TAG"
+	   << " | D\n";
 	for (int i = 0; i < L1_CACHE_SIZE; ++i) {
 		os << " 0b" << std::setw(L1_CACHE_SPEC) << std::bitset<L1_CACHE_SPEC>(i)
 		   << " | ";
@@ -116,7 +114,7 @@ std::ostream &operator<<(std::ostream &os, const Cache &c)
 		}
 		os << "| 0x" << std::setfill(' ')
 		   << std::bitset<MEM_SPEC - LINE_SPEC - L1_CACHE_SPEC>(meta.at(i)[0])
-		   << " | " << (int)(meta.at(i)[0] < 0) << '\n';
+		   << " | " << (int)(meta.at(i)[0] >= 0) << '\n';
 	}
 
 	std::cout.flags(default_flags);

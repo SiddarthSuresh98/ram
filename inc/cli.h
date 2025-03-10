@@ -29,10 +29,11 @@ class Cli
 
 	/**
 	 * Stores data into memory at the specified address.
-	 * @param memory_address address of the memory where data needs to be stored
+	 * @param accessor the pipline stage that is making this request
 	 * @param data data value to be written to the memory
+	 * @param address address of the memory where data needs to be stored
 	 */
-	void store(int memory_address, int data);
+	void store(Accessor accessor, int data, int address);
 
 	/**
 	 * Resets the memory configuration and cycles to their initial state.
@@ -64,10 +65,8 @@ class Cli
 	 * @param level the level specifying the storage device. The first level
 	 * one cache is level zero, with descending levels incrementing by a factor
 	 * of one.
-	 * @param base the first index to be printed
-	 * @param the number of lines to be printed
 	 */
-	void view(int level, int base, int lines);
+	void peek(int level);
 
 	/**
 	 * Runs the command line interface
