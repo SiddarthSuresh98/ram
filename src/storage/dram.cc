@@ -46,12 +46,15 @@ Response Dram::write(Accessor accessor, signed int data, int address)
 	return r;
 }
 
-void Dram::do_read(std::array<signed int, LINE_SIZE>& data_line, int address){
+void Dram::do_read(std::array<signed int, LINE_SIZE> &data_line, int address)
+{
 	int line = address / LINE_SIZE;
 	data_line = this->data->at(line);
 }
 
-Response Dram::read(Accessor accessor, int address, std::array<signed int, LINE_SIZE>& data) { 
+Response Dram::read(
+	Accessor accessor, int address, std::array<signed int, LINE_SIZE> &data)
+{
 	Response r = WAIT;
 	if (this->requester == IDLE)
 		this->requester = accessor;
@@ -61,5 +64,5 @@ Response Dram::read(Accessor accessor, int address, std::array<signed int, LINE_
 			r = OK;
 		}
 	}
-	return r; 
- }
+	return r;
+}

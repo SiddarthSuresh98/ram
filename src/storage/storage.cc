@@ -18,7 +18,7 @@ void Storage::resolve()
 	if (this->wait_time == 0) {
 		this->requester = IDLE;
 		this->wait_time = delay;
-	} else if (this->requester != IDLE && !this->is_blocked) {
+	} else if (this->requester != IDLE && !this->is_waiting) {
 		--this->wait_time;
 	}
 }

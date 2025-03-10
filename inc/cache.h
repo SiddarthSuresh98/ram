@@ -30,17 +30,17 @@ class Cache : public Storage
 	/**
 	 * Fetches `address` from a lower level of storage if it is not already
 	 * present. If it is not, temporarily sets the is_blocked attribute of this
-	 * cache level to true.
+	 * cache level to true, and the victim line is chosen/written back.
 	 * @param the address that must be present in cache.
 	 */
 	void fetch_resource(int address);
 	/**
-	 * An array of paired bits.
-	 * If the least significant bit of an element is set, the corresponding
-	 * element in `data` is invalid. If the most significant bit of an element
-	 * is set, the corresponding element in `data` is dirty.
+	 * An array of metadata about elements in `data`.
+	 * If the first value of an element is negative, the corresponding
+	 * element in `data` is invalid. If the most second value of an element
+	 * is nonzero, the corresponding element in `data` is dirty.
 	 */
-	std::array<std::bitset<2>, L1_CACHE_SIZE> stat;
+	std::array<std::array<int, 2>, L1_CACHE_SIZE> meta;
 };
 
 #endif /* CACHE_H_INCLUDED */

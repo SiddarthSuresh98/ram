@@ -73,10 +73,10 @@ class Storage
 	 */
 	int wait_time;
 	/**
-	 * A flag indicating whether this level of storage is currently blocked by a
-	 * lower level.
+	 * A flag indicating whether this level of storage is currently waiting for
+	 * a lower level.
 	 */
-	int is_blocked;
+	int is_waiting;
 };
 
 #endif /* STORAGE_H_INCLUDED */
