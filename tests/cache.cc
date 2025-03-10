@@ -38,7 +38,6 @@ TEST_CASE("no delay stores instantly", "[cache]")
 	actual = c->view(0, 1)[0];
 	REQUIRE(expected == actual);
 
-	delete d;
 	delete c;
 }
 
@@ -77,7 +76,6 @@ TEST_CASE("cache takes \"forever\"", "[cache]")
 	actual = c->view(0, 1)[0];
 	REQUIRE(expected == actual);
 
-	delete d;
 	delete c;
 }
 
@@ -116,7 +114,6 @@ TEST_CASE("dram takes \"forever\"", "[cache]")
 	actual = c->view(0, 1)[0];
 	REQUIRE(expected == actual);
 
-	delete d;
 	delete c;
 }
 
@@ -166,11 +163,11 @@ TEST_CASE("dram and cache take \"forever\"", "[cache]")
 	actual = c->view(0, 1)[0];
 	REQUIRE(expected == actual);
 
-	delete d;
 	delete c;
 }
 
-TEST_CASE("dram takes \"forever\", two concurrent requests same index", "[cache]")
+TEST_CASE(
+	"dram takes \"forever\", two concurrent requests same index", "[cache]")
 {
 	int delay = 0;
 	Dram *d = new Dram(MEM_SIZE, delay + 2);
@@ -223,11 +220,12 @@ TEST_CASE("dram takes \"forever\", two concurrent requests same index", "[cache]
 	actual = c->view(0, 1)[0];
 	REQUIRE(expected == actual);
 
-	delete d;
 	delete c;
 }
 
-TEST_CASE("dram takes \"forever\", two concurrent requests different index", "[cache]")
+TEST_CASE(
+	"dram takes \"forever\", two concurrent requests different index",
+	"[cache]")
 {
 	int delay = 0;
 	Dram *d = new Dram(MEM_SIZE, delay + 2);
@@ -289,11 +287,11 @@ TEST_CASE("dram takes \"forever\", two concurrent requests different index", "[c
 	actual = c->view(0, 1)[0];
 	REQUIRE(expected == actual);
 
-	delete d;
 	delete c;
 }
 
-TEST_CASE("dram takes \"forever\", two concurrent requests different tag", "[cache]")
+TEST_CASE(
+	"dram takes \"forever\", two concurrent requests different tag", "[cache]")
 {
 	// TODO
 }

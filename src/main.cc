@@ -1,9 +1,7 @@
-#include "logger.h"
 #include "cli.h"
+#include "logger.h"
 #include <getopt.h>
 #include <iostream>
-
-
 
 void err()
 {
@@ -43,7 +41,7 @@ void parseArguments(int argc, char **argv, Logger &logger, bool &python)
 int main(int argc, char **argv)
 {
 	Logger logger("vector.log");
-    Cli cli;
+	Cli cli;
 	logger.log(INFO, "Initializing...");
 
 	bool python = true;
@@ -55,6 +53,6 @@ int main(int argc, char **argv)
 		logger.log(INFO, "Python started.");
 	}
 
-    cli.run();
+	cli.run();
 	return EXIT_SUCCESS;
 }

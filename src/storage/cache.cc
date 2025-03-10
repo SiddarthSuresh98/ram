@@ -16,7 +16,11 @@ Cache::Cache(Storage *lower, int delay)
 	this->wait_time = this->delay;
 }
 
-Cache::~Cache() { delete this->data; }
+Cache::~Cache()
+{
+	delete this->lower;
+	delete this->data;
+}
 
 Response Cache::write(Accessor accessor, signed int data, int address)
 {
@@ -75,4 +79,9 @@ void Cache::fetch_resource(int expected)
 	}
 
 	this->is_waiting = (r == OK) ? false : true;
+}
+
+std::array<std::array<int, 2>, L1_CACHE_SIZE> *Cache::get_meta()
+{
+	return &(this->meta);
 }

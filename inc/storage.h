@@ -17,6 +17,8 @@ enum Accessor {
 class Storage
 {
   public:
+	virtual ~Storage() = default;
+
 	/**
 	 * Write `data` into `address`.
 	 * @param the source making the request.
@@ -48,6 +50,13 @@ class Storage
 	 * Advances to the next job if the current job is completed.
 	 */
 	void resolve();
+
+	/**
+	 * Getter for lower attribute.
+	 * TODO this doesn't seem like good object-oriented practice.
+	 * @return this->lower
+	 */
+	Storage *get_lower();
 
   protected:
 	/**

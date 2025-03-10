@@ -13,6 +13,8 @@ Storage::view(int base, int lines)
 	return ret;
 }
 
+Storage *Storage::get_lower() { return this->lower; }
+
 void Storage::resolve()
 {
 	if (this->wait_time == 0) {

@@ -25,6 +25,13 @@ class Cache : public Storage
 		int address,
 		std::array<signed int, LINE_SIZE> &data) override;
 
+	/**
+	 * Getter for the meta attribute.
+	 * TODO this doesn't seem like good object-oriented practice.
+	 * @return this->meta
+	 */
+	std::array<std::array<int, 2>, L1_CACHE_SIZE> *get_meta();
+
   private:
 	/**
 	 * Fetches `address` from a lower level of storage if it is not already

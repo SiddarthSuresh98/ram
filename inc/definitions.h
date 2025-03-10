@@ -31,6 +31,16 @@
 #define L1_CACHE_SIZE (int)pow(2, L1_CACHE_SPEC)
 
 /**
+ * The total number of cycles a memory access takes.
+ */
+#define MEM_DELAY 4
+
+/**
+ * The total number of cycles a level one cache access takes
+ */
+#define L1_CACHE_DELAY 1
+
+/**
  * Return the N least-significant bits from integer K using a bit mask
  * @param the integer to be parsed
  * @param the number of bits to be parsed
