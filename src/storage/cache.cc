@@ -8,9 +8,12 @@ Cache::Cache(Storage *lower, int delay)
 {
 	this->data = new std::vector<std::array<signed int, LINE_SIZE>>;
 	this->data->resize(L1_CACHE_SIZE);
-	this->lower = lower;
 	this->delay = delay;
-	this->meta.fill({-1});
+	this->is_waiting = false;
+	this->lower = lower;
+	this->meta.fill({-1, -1});
+	this->requester = IDLE;
+	this->wait_time = this->delay;
 }
 
 Cache::~Cache() { delete this->data; }
@@ -25,13 +28,12 @@ Response Cache::write(Accessor accessor, signed int data, int address)
 
 	if (this->requester == accessor) {
 		fetch_resource(address);
-		if (this->is_waiting == true)
+		if (this->is_waiting)
 			r = BLOCKED;
 		else if (this->wait_time == 0) {
 			int tag, index, offset;
 			get_bit_fields(address, &tag, &index, &offset);
 			this->data->at(index).at(offset) = data;
-			
 			r = OK;
 		}
 	}
@@ -48,16 +50,16 @@ Response Cache::read(
 void Cache::fetch_resource(int expected)
 {
 	Response r = OK;
-	int etag, index, eoffset, atag;
+	int tag, index, offset;
 	std::array<signed int, LINE_SIZE> actual;
 	std::array<int, 2> meta;
 
-	get_bit_fields(expected, &etag, &index, &eoffset);
+	get_bit_fields(expected, &tag, &index, &offset);
 	meta = this->meta.at(index);
 
-	if (atag != etag) {
+	if (this->meta[index][0] != tag) {
 		// address not in cache
-		if (this->meta[index][0] >= 0) {
+		if (this->meta[index][1] >= 0) {
 			// occupant is dirty
 			// TODO
 			r = WAIT;
@@ -65,6 +67,7 @@ void Cache::fetch_resource(int expected)
 			actual = this->data->at(index);
 			r = this->lower->read(L1CACHE, expected, actual);
 			// clear dirty bit and set tag?
+			
 		}
 	}
 

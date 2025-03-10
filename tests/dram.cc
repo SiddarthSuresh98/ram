@@ -85,8 +85,6 @@ TEST_CASE(
 		CHECK(r == WAIT);
 
 		actual = d->view(0, 1)[0];
-		CHECK(r == WAIT);
-
 		REQUIRE(expected == actual);
 		d->resolve();
 	}

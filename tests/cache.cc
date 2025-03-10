@@ -12,31 +12,74 @@ TEST_CASE("Constructor singleton cache", "[cache]")
 	delete c;
 }
 
-// TEST_CASE("no delay stores instantly", "[cache]")
+TEST_CASE("no delay stores instantly", "[cache]")
+{
+	int delay = 0;
+	Dram *d = new Dram(MEM_SIZE, delay);
+	Cache *c = new Cache(d, delay);
+	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
+	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
+	CHECK(expected == actual);
+
+	signed int w = 0x11223344;
+
+	Response r;
+
+	r = c->write(MEM, w, 0x0000000000000);
+	CHECK(r == OK);
+	d->resolve();
+	c->resolve();
+
+	actual = d->view(0, 1)[0];
+	// we do NOT write back now!
+	REQUIRE(expected == actual);
+
+	expected.at(0) = w;
+	actual = c->view(0, 1)[0];
+	REQUIRE(expected == actual);
+
+	delete d;
+	delete c;
+}
+
+// TEST_CASE("cache takes \"forever\"", "[cache]")
 // {
 // 	int delay = 0;
 // 	Dram *d = new Dram(MEM_SIZE, delay);
-// 	Cache *c = new Cache(d, delay);
+// 	Cache *c = new Cache(d, delay + 2);
 // 	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
 // 	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
 // 	CHECK(expected == actual);
 
 // 	signed int w = 0x11223344;
 
+// 	int i;
 // 	Response r;
-	
-// 	r = c->write(MEM, w, 0x0000000000000);	
+// 	for (i = 0; i < delay + 2; ++i) {
+// 		r = c->write(MEM, w, 0x0000000000000);
+// 		CHECK(r == WAIT);
+
+// 		// keep dram busy
+// 		r = d->write(MEM, w, 0x0000000000101);
+// 		CHECK(r == OK);
+
+// 		actual = c->view(0, 1)[0];
+// 		REQUIRE(expected == actual);
+// 		c->resolve();
+// 		d->resolve();
+// 	}
+
+// 	r = c->write(MEM, w, 0x0000000000000);
 // 	CHECK(r == OK);
 // 	d->resolve();
-// 	c->resolve();
-
-// 	expected.at(0) = w;
-// 	actual = c->view(0, 1)[0];
-// 	REQUIRE(expected == actual);
 
 // 	actual = d->view(0, 1)[0];
 // 	// we do NOT write back now!
-// 	REQUIRE(expected != actual);
+// 	REQUIRE(expected == actual);
+
+// 	expected.at(1) = w;
+// 	actual = c->view(0, 1)[0];
+// 	REQUIRE(expected == actual);
 
 // 	delete d;
 // 	delete c;
