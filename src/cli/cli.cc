@@ -120,11 +120,9 @@ void Cli::view(int level, int base, int lines)
 		curr = curr->get_lower();
 	}
 
-	std::vector<std::array<signed int, LINE_SIZE>> data =
-		curr->view(base, lines);
-
-	if (dynamic_cast<const Cache *>(curr)) {
-
+	Cache *c = dynamic_cast<Cache *>(curr);
+	if (c) {
+		std::cout << *c;
 	} else {
 		std::cout << "dram";
 	}

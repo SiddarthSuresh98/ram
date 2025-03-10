@@ -3,6 +3,7 @@
 #include "definitions.h"
 #include "storage.h"
 #include <array>
+#include <ostream>
 
 class Cache : public Storage
 {
@@ -30,7 +31,7 @@ class Cache : public Storage
 	 * TODO this doesn't seem like good object-oriented practice.
 	 * @return this->meta
 	 */
-	std::array<std::array<int, 2>, L1_CACHE_SIZE> *get_meta();
+	std::array<std::array<int, 2>, L1_CACHE_SIZE> get_meta() const;
 
   private:
 	/**
@@ -48,5 +49,7 @@ class Cache : public Storage
 	 */
 	std::array<std::array<int, 2>, L1_CACHE_SIZE> meta;
 };
+
+std::ostream &operator<<(std::ostream &os, const Cache &a);
 
 #endif /* CACHE_H_INCLUDED */

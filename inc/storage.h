@@ -45,7 +45,7 @@ class Storage
 	 * @return A matrix of data values, where each row is a line and each column
 	 * is a word.
 	 */
-	std::vector<std::array<signed int, LINE_SIZE>> view(int base, int lines);
+	std::vector<std::array<signed int, LINE_SIZE>> view(int base, int lines) const;
 	/**
 	 * Advances to the next job if the current job is completed.
 	 */

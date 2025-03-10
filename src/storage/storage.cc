@@ -3,7 +3,7 @@
 #include <algorithm>
 
 std::vector<std::array<signed int, LINE_SIZE>>
-Storage::view(int base, int lines)
+Storage::view(int base, int lines) const
 {
 	base = (base / LINE_SIZE) * LINE_SIZE;
 	std::vector<std::array<signed int, LINE_SIZE>> ret(lines + 1);
