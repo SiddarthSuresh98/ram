@@ -15,7 +15,7 @@ TEST_CASE("Constructor singleton cache", "[cache]")
 TEST_CASE("no delay stores instantly", "[cache]")
 {
 	int delay = 0;
-	Dram *d = new Dram(MEM_SIZE, delay);
+	Dram *d = new Dram(MEM_LINES, delay);
 	Cache *c = new Cache(d, delay);
 	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
 	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
@@ -43,7 +43,7 @@ TEST_CASE("no delay stores instantly", "[cache]")
 TEST_CASE("cache takes \"forever\"", "[cache]")
 {
 	int delay = 0;
-	Dram *d = new Dram(MEM_SIZE, delay);
+	Dram *d = new Dram(MEM_LINES, delay);
 	Cache *c = new Cache(d, delay + 2);
 	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
 	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
@@ -79,7 +79,7 @@ TEST_CASE("cache takes \"forever\"", "[cache]")
 TEST_CASE("dram takes \"forever\"", "[cache]")
 {
 	int delay = 0;
-	Dram *d = new Dram(MEM_SIZE, delay + 2);
+	Dram *d = new Dram(MEM_LINES, delay + 2);
 	Cache *c = new Cache(d, delay);
 	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
 	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
@@ -115,7 +115,7 @@ TEST_CASE("dram takes \"forever\"", "[cache]")
 TEST_CASE("dram and cache take \"forever\"", "[cache]")
 {
 	int delay = 2;
-	Dram *d = new Dram(MEM_SIZE, delay + 2);
+	Dram *d = new Dram(MEM_LINES, delay + 2);
 	Cache *c = new Cache(d, delay);
 	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
 	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
@@ -162,7 +162,7 @@ TEST_CASE(
 	"dram takes \"forever\", two concurrent requests same index", "[cache]")
 {
 	int delay = 0;
-	Dram *d = new Dram(MEM_SIZE, delay + 2);
+	Dram *d = new Dram(MEM_LINES, delay + 2);
 	Cache *c = new Cache(d, delay);
 	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
 	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
@@ -217,7 +217,7 @@ TEST_CASE(
 	"[cache]")
 {
 	int delay = 0;
-	Dram *d = new Dram(MEM_SIZE, delay + 2);
+	Dram *d = new Dram(MEM_LINES, delay + 2);
 	Cache *c = new Cache(d, delay);
 	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
 	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];

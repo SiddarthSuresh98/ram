@@ -31,7 +31,7 @@ class Cache : public Storage
 	 * TODO this doesn't seem like good object-oriented practice.
 	 * @return this->meta
 	 */
-	std::array<std::array<int, 2>, L1_CACHE_SIZE> get_meta() const;
+	std::array<std::array<int, 2>, L1_CACHE_LINES> get_meta() const;
 
   private:
 	/**
@@ -47,7 +47,7 @@ class Cache : public Storage
 	 * element in `data` is invalid. If the most second value of an element
 	 * is nonzero, the corresponding element in `data` is dirty.
 	 */
-	std::array<std::array<int, 2>, L1_CACHE_SIZE> meta;
+	std::array<std::array<int, 2>, L1_CACHE_LINES> meta;
 };
 
 std::ostream &operator<<(std::ostream &os, const Cache &c);

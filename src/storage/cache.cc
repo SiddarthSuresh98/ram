@@ -10,7 +10,7 @@
 Cache::Cache(Storage *lower, int delay)
 {
 	this->data = new std::vector<std::array<signed int, LINE_SIZE>>;
-	this->data->resize(L1_CACHE_SIZE);
+	this->data->resize(L1_CACHE_LINES);
 	this->delay = delay;
 	this->is_waiting = false;
 	this->lower = lower;
@@ -84,9 +84,9 @@ void Cache::fetch_resource(int expected)
 	this->is_waiting = (r == OK) ? false : true;
 }
 
-std::array<std::array<int, 2>, L1_CACHE_SIZE> Cache::get_meta() const
+std::array<std::array<int, 2>, L1_CACHE_LINES> Cache::get_meta() const
 {
-	std::array<std::array<int, 2>, L1_CACHE_SIZE> ret;
+	std::array<std::array<int, 2>, L1_CACHE_LINES> ret;
 	std::copy(std::begin(this->meta), std::end(this->meta), std::begin(ret));
 	return ret;
 }
@@ -97,24 +97,29 @@ std::ostream &operator<<(std::ostream &os, const Cache &c)
 	const auto default_fill = std::cout.fill();
 
 	std::vector<std::array<signed int, LINE_SIZE>> data =
-		c.view(0, L1_CACHE_SIZE);
-	std::array<std::array<int, 2>, L1_CACHE_SIZE> meta = c.get_meta();
+		c.view(0, L1_CACHE_LINES);
+	std::array<std::array<int, 2>, L1_CACHE_LINES> meta = c.get_meta();
 
-	os << " " << std::setfill(' ') << std::setw(L1_CACHE_SPEC + 2) << "INDEX"
+	os << " " << std::setfill(' ') << std::setw(L1_CACHE_LINE_SPEC + 2) << "INDEX"
 	   << " | " << std::setfill(' ') << std::setw((8 + 3) * 4 - 1) << "DATA"
 	   << " | " << std::setfill(' ')
-	   << std::setw(MEM_SPEC - LINE_SPEC - L1_CACHE_SPEC + 2) << "TAG"
+	   << std::setw(MEM_LINE_SPEC - LINE_SPEC - L1_CACHE_LINE_SPEC + 2) << "TAG"
 	   << " | D" << std::endl;
-	for (int i = 0; i < L1_CACHE_SIZE; ++i) {
-		os << " 0b" << std::setw(L1_CACHE_SPEC) << std::bitset<L1_CACHE_SPEC>(i)
+	for (int i = 0; i < L1_CACHE_LINES; ++i) {
+		os << " 0b" << std::setw(L1_CACHE_LINE_SPEC) << std::bitset<L1_CACHE_LINE_SPEC>(i)
 		   << " | ";
 		for (int j = 0; j < LINE_SIZE; ++j) {
 			os << "0x" << std::setfill('0') << std::setw(8) << std::hex
 			   << data.at(i).at(j) << " ";
 		}
-		os << "| 0x" << std::setfill(' ')
-		   << std::bitset<MEM_SPEC - LINE_SPEC - L1_CACHE_SPEC>(meta.at(i)[0])
-		   << " | " << (int)(meta.at(i)[0] >= 0) << std::endl;
+		os << "| 0x" << std::setfill(' ');
+
+		if (meta.at(i)[0] < 0)
+			os << "?";
+		else
+		  os << std::bitset<MEM_LINE_SPEC - LINE_SPEC - L1_CACHE_LINE_SPEC>(meta.at(i)[0]);
+
+		os << " | " << (int)(meta.at(i)[0] >= 0) << std::endl;
 	}
 
 	std::cout.flags(default_flags);

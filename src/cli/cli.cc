@@ -116,7 +116,7 @@ void Cli::load(Accessor accessor, int address)
 void Cli::store(Accessor accessor, int data, int address)
 {
 	Response r = this->cache->write(accessor, data, address);
-	std::cout << r << " to " << accessor << " storing " << data << " in"
+	std::cout << r << " to " << accessor << " storing " << data << " in "
 			  << address << std::endl;
 }
 
@@ -209,7 +209,7 @@ void Cli::initialize()
 	if (this->cache != nullptr)
 		delete this->cache;
 
-	Dram *d = new Dram(MEM_SIZE, MEM_DELAY);
+	Dram *d = new Dram(MEM_LINES, MEM_DELAY);
 	this->cache = new Cache(d, L1_CACHE_DELAY);
 	this->cycle = 1;
 }
