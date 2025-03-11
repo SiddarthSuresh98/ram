@@ -16,7 +16,7 @@
  * The number of bits to specify a memory line
  * calculated as: (/ (expt 2 15) 4)
  */
-#define MEM_SPEC 13
+#define MEM_SPEC 8
 /**
  * The total number of words in memory
  */

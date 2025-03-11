@@ -50,6 +50,6 @@ class Cache : public Storage
 	std::array<std::array<int, 2>, L1_CACHE_SIZE> meta;
 };
 
-std::ostream &operator<<(std::ostream &os, const Cache &a);
+std::ostream &operator<<(std::ostream &os, const Cache &c);
 
 #endif /* CACHE_H_INCLUDED */

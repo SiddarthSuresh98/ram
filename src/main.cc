@@ -4,6 +4,8 @@
 #include <getopt.h>
 #include <iostream>
 
+static Logger *global_log = Logger::getInstance();
+
 static std::string version_number = "v0.1";
 static std::string banner =
   "    _/_/_/    _/_/_/    _/_/_/    _/_/_/   \n"
@@ -32,7 +34,6 @@ static void err()
 
 static void parseArguments(int argc, char **argv, bool &python)
 {
-	Logger *global_log = Logger::getInstance();
 	struct option long_options[] = {
 		{"debug", no_argument, 0, 'd'},
 		{"no-python", no_argument, 0, 'p'},
@@ -64,7 +65,6 @@ static void parseArguments(int argc, char **argv, bool &python)
 
 int main(int argc, char **argv)
 {
-	Logger *global_log = Logger::getInstance();
 	print_version_number();
 	Cli cli;
 	global_log->log(INFO, "Initializing...");

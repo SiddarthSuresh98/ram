@@ -5,6 +5,8 @@
 #include "response.h"
 #include <stdio.h>
 
+static Logger *global_log = Logger::getInstance();
+
 Cli::Cli()
 {
 	this->initialize();
@@ -83,10 +85,9 @@ void Cli::help()
 		   "specified address. Accessor must be one of: \"MEM\", \"FETCH\", "
 		   "\"L1CACHE\".\n"
 		<< "  c - manually advances the clock\n"
+		<< "  f - advances the clock until one operation reports completion\n"
 		<< "  r - side door function that resets the memory configuration and "
 		   "cycles\n"
-		<< "  u <address> <data> - side door function that updates "
-		   "the memory at the specified address with data provided\n"
 		<< "  p <storage-level> <base> <lines> - side door function that peeks "
 		   "the current status of the entire memory subsystem\n"
 		<< "  h - Prints this help text\n"
@@ -129,7 +130,8 @@ void Cli::peek(int level)
 	if (c) {
 		std::cout << *c;
 	} else {
-		std::cout << "dram";
+		std::cout << *dynamic_cast<Dram *>(curr);
+		;
 	}
 }
 
@@ -173,7 +175,7 @@ void Cli::run()
 void Cli::initialize()
 {
 	Logger *global_log = Logger::getInstance();
-	global_log->log(INFO, "Resetting memory configuration.\n");
+	global_log->log(INFO, "Resetting memory configuration.");
 	if (this->cache == nullptr)
 		delete this->cache;
 	Dram *d = new Dram(MEM_SIZE, MEM_DELAY);
