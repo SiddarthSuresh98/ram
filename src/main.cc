@@ -1,10 +1,10 @@
 #include "cli.h"
 #include "logger.h"
+#include "definitions.h"
 #include <getopt.h>
 #include <iostream>
 
 static std::string version_number = "v0.1";
-
 static std::string banner =
   "    _/_/_/    _/_/_/    _/_/_/    _/_/_/   \n"
   "   _/    _/    _/    _/        _/          \n"
@@ -20,7 +20,6 @@ static std::string banner =
   " _/  _/    _/    _/        _/            _/      _/    _/  _/    _/    _/      \n"
   "  _/      _/    _/_/_/_/    _/_/_/      _/        _/_/    _/    _/    _/       \n"
   "         _/_/                                                      _/_/        \n";
-
 static void print_version_number() { std::cout << banner << version_number << '\n'; }
 
 static void err()
@@ -33,7 +32,7 @@ static void err()
 
 static void parseArguments(int argc, char **argv, bool &python)
 {
-	Logger *logger = Logger::getInstance();
+	Logger *global_log = Logger::getInstance();
 	struct option long_options[] = {
 		{"debug", no_argument, 0, 'd'},
 		{"no-python", no_argument, 0, 'p'},
@@ -46,11 +45,11 @@ static void parseArguments(int argc, char **argv, bool &python)
 	while ((opt = getopt_long(argc, argv, "d:p", long_options, NULL)) != -1) {
 		switch (opt) {
 		case 'd':
-			logger->setLevel(DEBUG);
-			logger->log(DEBUG, "DEBUG output enabled.");
+			global_log->setLevel(DEBUG);
+			global_log->log(DEBUG, "DEBUG output enabled.");
 			break;
 		case 'p':
-			logger->log(INFO, "Python will NOT be started!");
+			global_log->log(INFO, "Python will NOT be started!");
 			python = false;
 			break;
 		case 'v':
@@ -65,10 +64,10 @@ static void parseArguments(int argc, char **argv, bool &python)
 
 int main(int argc, char **argv)
 {
+	Logger *global_log = Logger::getInstance();
 	print_version_number();
-	Logger *logger = Logger::getInstance();
 	Cli cli;
-	logger->log(INFO, "Initializing...");
+	global_log->log(INFO, "Initializing...");
 
 	bool python = true;
 	parseArguments(argc, argv, python);
@@ -76,7 +75,7 @@ int main(int argc, char **argv)
 	if (python) {
 		// fork off python here
 		;
-		logger->log(INFO, "Python started.");
+		global_log->log(INFO, "Python started.");
 	}
 
 	cli.run();

@@ -3,9 +3,7 @@
 #include "definitions.h"
 #include "dram.h"
 #include "response.h"
-#include <iostream>
-#include <sstream>
-#include <vector>
+#include <stdio.h>
 
 Cli::Cli()
 {
@@ -95,10 +93,7 @@ void Cli::help()
 		<< "  q - Quits the program\n";
 }
 
-void Cli::load(int memory_address)
-{
-	std::cout << "Loading data from memory address " << memory_address;
-}
+void Cli::load(int memory_address) { ; }
 
 void Cli::store(Accessor accessor, int data, int address)
 {
@@ -142,11 +137,12 @@ void Cli::run()
 {
 	std::cout << "Memory Command Processor Started. Type 'h' for a list of "
 				 "commands.\n";
-
 	std::string input;
+
 	while (true) {
 		std::cout << "> ";
 		std::getline(std::cin, input);
+
 		std::istringstream iss(input);
 		std::vector<std::string> tokens;
 		std::string word;
@@ -168,15 +164,16 @@ void Cli::run()
 		if (it != commands.end()) {
 			it->second(tokens);
 		} else {
-			std::cout
-				<< "Unknown command. Type 'help' for available commands.\n";
+			std::cout << "Unknown command: '" << command
+					  << "'. Type 'help' for available commands.\n";
 		}
 	}
 }
 
 void Cli::initialize()
 {
-	std::cout << "Resetting memory configuration.\n";
+	Logger *global_log = Logger::getInstance();
+	global_log->log(INFO, "Resetting memory configuration.\n");
 	if (this->cache == nullptr)
 		delete this->cache;
 	Dram *d = new Dram(MEM_SIZE, MEM_DELAY);
