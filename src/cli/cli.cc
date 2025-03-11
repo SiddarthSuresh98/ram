@@ -5,10 +5,9 @@
 #include "response.h"
 #include <stdio.h>
 
-static Logger *global_log = Logger::getInstance();
-
 Cli::Cli()
 {
+	this->cache = nullptr;
 	this->initialize();
 
 	commands["l"] = [this](std::vector<std::string> args) {
@@ -176,7 +175,7 @@ void Cli::initialize()
 {
 	Logger *global_log = Logger::getInstance();
 	global_log->log(INFO, "Resetting memory configuration.");
-	if (this->cache == nullptr)
+	if (this->cache != nullptr)
 		delete this->cache;
 	Dram *d = new Dram(MEM_SIZE, MEM_DELAY);
 	this->cache = new Cache(d, L1_CACHE_DELAY);
