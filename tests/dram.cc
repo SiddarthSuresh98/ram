@@ -22,7 +22,7 @@ TEST_CASE(
 
 	signed int w = 0x11223344;
 
-	Response r = d->write(MEM, w, 0x00000000);
+	Response r = d->write_word(MEM, w, 0x00000000);
 	CHECK(r == OK);
 
 	expected.at(0) = w;
@@ -46,7 +46,7 @@ TEST_CASE(
 	int i;
 	Response r;
 	for (i = 0; i < delay; ++i) {
-		r = d->write(MEM, w, 0x00000000);
+		r = d->write_word(MEM, w, 0x00000000);
 		CHECK(r == WAIT);
 
 		actual = d->view(0, 1)[0];
@@ -54,7 +54,7 @@ TEST_CASE(
 		d->resolve();
 	}
 
-	r = d->write(MEM, w, 0x00000000);
+	r = d->write_word(MEM, w, 0x00000000);
 	CHECK(r == OK);
 	d->resolve();
 
@@ -81,7 +81,7 @@ TEST_CASE(
 	int i;
 	Response r;
 	for (i = 0; i < delay; ++i) {
-		r = d->write(MEM, w, 0x00000000);
+		r = d->write_word(MEM, w, 0x00000000);
 		CHECK(r == WAIT);
 
 		actual = d->view(0, 1)[0];
@@ -89,11 +89,11 @@ TEST_CASE(
 		d->resolve();
 	}
 
-	r = d->write(MEM, w, 0x00000000);
+	r = d->write_word(MEM, w, 0x00000000);
 	REQUIRE(r == OK);
 	// clock cycle did NOT resolve yet!
 	// this fetch should not make progress
-	r = d->write(FETCH, w, 0x00000001);
+	r = d->write_word(FETCH, w, 0x00000001);
 	CHECK(r == WAIT);
 
 	actual = d->view(0, 1)[0];
@@ -105,7 +105,7 @@ TEST_CASE(
 	REQUIRE(expected == actual);
 
 	for (i = 0; i < delay; ++i) {
-		r = d->write(FETCH, w, 0x00000001);
+		r = d->write_word(FETCH, w, 0x00000001);
 		CHECK(r == WAIT);
 
 		actual = d->view(0, 1)[0];
@@ -113,7 +113,7 @@ TEST_CASE(
 		d->resolve();
 	}
 
-	r = d->write(FETCH, w, 0x00000001);
+	r = d->write_word(FETCH, w, 0x00000001);
 	actual = d->view(0, 1)[0];
 	CHECK(r == OK);
 
@@ -140,10 +140,10 @@ TEST_CASE(
 	int i;
 	Response r;
 	for (i = 0; i < delay; ++i) {
-		r = d->write(MEM, w, 0x00000000);
+		r = d->write_word(MEM, w, 0x00000000);
 		CHECK(r == WAIT);
 
-		r = d->write(FETCH, w, 0x00000001);
+		r = d->write_word(FETCH, w, 0x00000001);
 		CHECK(r == WAIT);
 
 		actual = d->view(0, 1)[0];
@@ -151,9 +151,9 @@ TEST_CASE(
 		d->resolve();
 	}
 
-	r = d->write(MEM, w, 0x00000000);
+	r = d->write_word(MEM, w, 0x00000000);
 	CHECK(r == OK);
-	r = d->write(FETCH, w, 0x00000001);
+	r = d->write_word(FETCH, w, 0x00000001);
 	CHECK(r == WAIT);
 	d->resolve();
 
@@ -162,10 +162,10 @@ TEST_CASE(
 	REQUIRE(expected == actual);
 
 	for (i = 0; i < delay; ++i) {
-		r = d->write(FETCH, w, 0x00000001);
+		r = d->write_word(FETCH, w, 0x00000001);
 		CHECK(r == WAIT);
 
-		r = d->write(MEM, w, 0x00000003);
+		r = d->write_word(MEM, w, 0x00000003);
 		CHECK(r == WAIT);
 
 		actual = d->view(0, 1)[0];
@@ -173,10 +173,10 @@ TEST_CASE(
 		d->resolve();
 	}
 
-	r = d->write(FETCH, w, 0x00000001);
+	r = d->write_word(FETCH, w, 0x00000001);
 	actual = d->view(0, 1)[0];
 	CHECK(r == OK);
-	r = d->write(MEM, w, 0x00000003);
+	r = d->write_word(MEM, w, 0x00000003);
 	CHECK(r == WAIT);
 
 	expected.at(1) = w;
@@ -378,19 +378,19 @@ TEST_CASE("Construct singleton dram, write a line to an address in 0 cycles, rea
 	int addr = 0x00000000;
 	d->write_line(MEM, expected, addr);
 
-	Response r = d->read(MEM, 0x00000000, actual);
+	Response r = d->read_line(MEM, 0x00000000, actual);
 	CHECK(r == OK);
 	REQUIRE(expected == actual);
 
-	r = d->read(MEM, 0x00000001, actual);
+	r = d->read_line(MEM, 0x00000001, actual);
 	CHECK(r == OK);
 	REQUIRE(expected == actual);
 
-	r = d->read(MEM, 0x00000002, actual);
+	r = d->read_line(MEM, 0x00000002, actual);
 	CHECK(r == OK);
 	REQUIRE(expected == actual);
 
-	r = d->read(MEM, 0x00000003, actual);
+	r = d->read_line(MEM, 0x00000003, actual);
 	CHECK(r == OK);
 	REQUIRE(expected == actual);
 
@@ -420,13 +420,13 @@ TEST_CASE("Construct singleton dram, write a line to an address in three cycles,
 	d->resolve();
 
 	for (i = 0; i < delay; ++i) {
-		r = d->read(MEM, 0x00000000, actual);
+		r = d->read_line(MEM, 0x00000000, actual);
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
 		d->resolve();
 	}
 
-	r = d->read(MEM, 0x00000000, actual);
+	r = d->read_line(MEM, 0x00000000, actual);
 	CHECK(r == OK);
 	d->resolve();
 	REQUIRE(expected == actual);
@@ -456,30 +456,30 @@ TEST_CASE(
 	d->resolve();
 
 	for (i = 0; i < delay; ++i) {
-		r = d->read(MEM, 0x00000000, actual);
+		r = d->read_line(MEM, 0x00000000, actual);
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
 		d->resolve();
 	}
 
-	r = d->read(MEM, 0x00000000, actual);
+	r = d->read_line(MEM, 0x00000000, actual);
 	REQUIRE(r == OK);
-	r = d->read(FETCH, 0x00000003, actual);
+	r = d->read_line(FETCH, 0x00000003, actual);
 	CHECK(r == WAIT); 
 	d->resolve();
 	REQUIRE(expected == actual);
 
 	actual = {0,0,0,0};
 	for (i = 0; i < delay; ++i) {
-		r = d->read(FETCH, 0x00000000, actual);
+		r = d->read_line(FETCH, 0x00000000, actual);
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
 		d->resolve();
 	}
 
-	r = d->read(FETCH, 0x00000000, actual);
+	r = d->read_line(FETCH, 0x00000000, actual);
 	REQUIRE(r == OK);
-	r = d->read(MEM, 0x00000002, actual);
+	r = d->read_line(MEM, 0x00000002, actual);
 	CHECK(r == WAIT);
 	d->resolve();
 	REQUIRE(expected == actual);
@@ -512,36 +512,36 @@ TEST_CASE(
 
 
 	for (i = 0; i < delay; ++i) {
-		r = d->read(MEM, 0x00000000, actual);
+		r = d->read_line(MEM, 0x00000000, actual);
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
-		r = d->read(FETCH, 0x00000002, actual);
+		r = d->read_line(FETCH, 0x00000002, actual);
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
 		d->resolve();
 	}
 
-	r = d->read(MEM, 0x00000000, actual);
+	r = d->read_line(MEM, 0x00000000, actual);
 	REQUIRE(r == OK);
-	r = d->read(FETCH, 0x00000003, actual);
+	r = d->read_line(FETCH, 0x00000003, actual);
 	CHECK(r == WAIT); 
 	d->resolve();
 	REQUIRE(expected == actual);
 
 	actual = {0,0,0,0};
 	for (i = 0; i < delay; ++i) {
-		r = d->read(FETCH, 0x00000000, actual);
+		r = d->read_line(FETCH, 0x00000000, actual);
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
-		r = d->read(MEM, 0x00000002, actual);
+		r = d->read_line(MEM, 0x00000002, actual);
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
 		d->resolve();
 	}
 
-	r = d->read(FETCH, 0x00000000, actual);
+	r = d->read_line(FETCH, 0x00000000, actual);
 	REQUIRE(r == OK);
-	r = d->read(MEM, 0x00000002, actual);
+	r = d->read_line(MEM, 0x00000002, actual);
 	CHECK(r == WAIT);
 	d->resolve();
 	REQUIRE(expected == actual);
@@ -561,24 +561,24 @@ TEST_CASE("Construct singleton dram, write a line to an address one element at a
 	signed int w = 0x11223311;
 	int addr = 0x00000000;
 	for(int i=0; i<LINE_SIZE; ++i) {
-		Response r = d->write(MEM, w, addr++);
+		Response r = d->write_word(MEM, w, addr++);
 		CHECK(r == OK);
 		expected.at(i) = w++;
 	}
 
-	Response r = d->read(MEM, 0x00000000, actual);
+	Response r = d->read_line(MEM, 0x00000000, actual);
 	CHECK(r == OK);
 	REQUIRE(expected == actual);
 
-	r = d->read(MEM, 0x00000001, actual);
+	r = d->read_line(MEM, 0x00000001, actual);
 	CHECK(r == OK);
 	REQUIRE(expected == actual);
 
-	r = d->read(MEM, 0x00000002, actual);
+	r = d->read_line(MEM, 0x00000002, actual);
 	CHECK(r == OK);
 	REQUIRE(expected == actual);
 
-	r = d->read(MEM, 0x00000003, actual);
+	r = d->read_line(MEM, 0x00000003, actual);
 	CHECK(r == OK);
 	REQUIRE(expected == actual);
 
@@ -599,22 +599,22 @@ TEST_CASE("Construct singleton dram, write a line to an address one element at a
 	Response r;
 	for(i=0; i<LINE_SIZE; ++i) {
 		for(int j=0; j<delay; ++j) {
-			r = d->write(MEM, w, addr);
+			r = d->write_word(MEM, w, addr);
 			d->resolve();
 		}
-		r = d->write(MEM, w, addr++);
+		r = d->write_word(MEM, w, addr++);
 		d->resolve();
 		expected.at(i) = w++;
 	}
 
 	for (i = 0; i < delay; ++i) {
-		r = d->read(MEM, 0x00000000, actual);
+		r = d->read_line(MEM, 0x00000000, actual);
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
 		d->resolve();
 	}
 
-	r = d->read(MEM, 0x00000000, actual);
+	r = d->read_line(MEM, 0x00000000, actual);
 	CHECK(r == OK);
 	d->resolve();
 	REQUIRE(expected == actual);
@@ -636,39 +636,39 @@ TEST_CASE(
 	Response r;
 	for(i=0; i<LINE_SIZE; ++i) {
 		for(int j=0; j<delay; ++j) {
-			r = d->write(MEM, w, addr);
+			r = d->write_word(MEM, w, addr);
 			d->resolve();
 		}
-		r = d->write(MEM, w, addr++);
+		r = d->write_word(MEM, w, addr++);
 		d->resolve();
 		expected.at(i) = w++;
 	}
 
 	for (i = 0; i < delay; ++i) {
-		r = d->read(MEM, 0x00000000, actual);
+		r = d->read_line(MEM, 0x00000000, actual);
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
 		d->resolve();
 	}
 
-	r = d->read(MEM, 0x00000000, actual);
+	r = d->read_line(MEM, 0x00000000, actual);
 	REQUIRE(r == OK);
-	r = d->read(FETCH, 0x00000003, actual);
+	r = d->read_line(FETCH, 0x00000003, actual);
 	CHECK(r == WAIT); 
 	d->resolve();
 	REQUIRE(expected == actual);
 
 	actual = {0,0,0,0};
 	for (i = 0; i < delay; ++i) {
-		r = d->read(FETCH, 0x00000000, actual);
+		r = d->read_line(FETCH, 0x00000000, actual);
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
 		d->resolve();
 	}
 
-	r = d->read(FETCH, 0x00000000, actual);
+	r = d->read_line(FETCH, 0x00000000, actual);
 	REQUIRE(r == OK);
-	r = d->read(MEM, 0x00000002, actual);
+	r = d->read_line(MEM, 0x00000002, actual);
 	CHECK(r == WAIT);
 	d->resolve();
 	REQUIRE(expected == actual);
@@ -692,45 +692,45 @@ TEST_CASE(
 	Response r;
 	for(i=0; i<LINE_SIZE; ++i) {
 		for(int j=0; j<delay; ++j) {
-			r = d->write(MEM, w, addr);
+			r = d->write_word(MEM, w, addr);
 			d->resolve();
 		}
-		r = d->write(MEM, w, addr++);
+		r = d->write_word(MEM, w, addr++);
 		d->resolve();
 		expected.at(i) = w++;
 	}
 
 	for (i = 0; i < delay; ++i) {
-		r = d->read(MEM, 0x00000000, actual);
+		r = d->read_line(MEM, 0x00000000, actual);
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
-		r = d->read(FETCH, 0x00000002, actual);
+		r = d->read_line(FETCH, 0x00000002, actual);
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
 		d->resolve();
 	}
 
-	r = d->read(MEM, 0x00000000, actual);
+	r = d->read_line(MEM, 0x00000000, actual);
 	REQUIRE(r == OK);
-	r = d->read(FETCH, 0x00000003, actual);
+	r = d->read_line(FETCH, 0x00000003, actual);
 	CHECK(r == WAIT); 
 	d->resolve();
 	REQUIRE(expected == actual);
 
 	actual = {0,0,0,0};
 	for (i = 0; i < delay; ++i) {
-		r = d->read(FETCH, 0x00000000, actual);
+		r = d->read_line(FETCH, 0x00000000, actual);
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
-		r = d->read(MEM, 0x00000002, actual);
+		r = d->read_line(MEM, 0x00000002, actual);
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
 		d->resolve();
 	}
 
-	r = d->read(FETCH, 0x00000000, actual);
+	r = d->read_line(FETCH, 0x00000000, actual);
 	REQUIRE(r == OK);
-	r = d->read(MEM, 0x00000002, actual);
+	r = d->read_line(MEM, 0x00000002, actual);
 	CHECK(r == WAIT);
 	d->resolve();
 	REQUIRE(expected == actual);
@@ -753,7 +753,7 @@ TEST_CASE("Sidedoor bypasses delay", "[dram]")
 	int i;
 	Response r;
 	for (i = 0; i < delay - 1; ++i) {
-		r = d->write(MEM, w, 0x00000000);
+		r = d->write_word(MEM, w, 0x00000000);
 		CHECK(r == WAIT);
 
 		actual = d->view(0, 1)[0];
@@ -761,12 +761,12 @@ TEST_CASE("Sidedoor bypasses delay", "[dram]")
 		d->resolve();
 	}
 
-	r = d->write(MEM, w, 0x00000000);
+	r = d->write_word(MEM, w, 0x00000000);
 	CHECK(r == WAIT);
 	actual = d->view(0, 1)[0];
 	REQUIRE(expected == actual);
 
-	r = d->write(SIDE, w, 0x00000001);
+	r = d->write_word(SIDE, w, 0x00000001);
 	actual = d->view(0, 1)[0];
 	CHECK(r == OK);
 

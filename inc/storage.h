@@ -20,7 +20,7 @@ class Storage
 	 * @param the address to write to.
 	 * @return a status code reflecting the state of the request.
 	 */
-	virtual Response write(Accessor accessor, signed int data, int address) = 0;
+	virtual Response write_word(Accessor accessor, signed int data, int address) = 0;
 
 	/**
 	 * Write a data line to given address in this level of storage
@@ -35,7 +35,7 @@ class Storage
 	 * @return a status code reflecting the state of the request, and the
 	 * data being returned.
 	 */
-	virtual Response read(
+	virtual Response read_line(
 		Accessor accessor,
 		int address,
 		std::array<signed int, LINE_SIZE> &data) = 0;

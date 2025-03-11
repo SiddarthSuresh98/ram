@@ -115,7 +115,7 @@ void Cli::load(Accessor accessor, int address)
 
 void Cli::store(Accessor accessor, int data, int address)
 {
-	Response r = this->cache->write(accessor, data, address);
+	Response r = this->cache->write_word(accessor, data, address);
 	std::cout << r << " to " << accessor << " storing " << data << " in"
 			  << address << std::endl;
 }

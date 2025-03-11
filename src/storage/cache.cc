@@ -25,7 +25,7 @@ Cache::~Cache()
 	delete this->data;
 }
 
-Response Cache::write(Accessor accessor, signed int data, int address)
+Response Cache::write_word(Accessor accessor, signed int data, int address)
 {
 	Response r = WAIT;
 
@@ -75,7 +75,7 @@ Response Cache::write_line(
 }
 
 // TODO: tests for multi level cache
-Response Cache::read(
+Response Cache::read_line(
 	Accessor accessor,
 	int address,
 	std::array<signed int, LINE_SIZE> &data_line)
@@ -140,7 +140,7 @@ void Cache::fetch_resource(int expected)
 				meta->at(1) = -1;
 			}
 		} else {
-			r = this->lower->read(L1CACHE, expected, actual);
+			r = this->lower->read_line(L1CACHE, expected, actual);
 			if (r == OK) {
 				meta->at(0) = tag;
 			}
