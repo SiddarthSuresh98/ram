@@ -104,10 +104,10 @@ void Cli::load(Accessor accessor, int address)
 	const auto default_fill = std::cout.fill();
 
 	signed int data;
-	// Response r = this->cache->read_word(accessor, address, data);
-	// std::cout << r << " to " << accessor << " reading " << address << std::endl;
-	// if (r == OK)
-	// 	std::cout << "\tGot:" << std::hex << data;
+	Response r = this->cache->read_word(accessor, address, data);
+	std::cout << r << " to " << accessor << " reading " << address << std::endl;
+	if (r == OK)
+		std::cout << "  Got:" << std::hex << data << std::endl;
 
 	std::cout.flags(default_flags);
 	std::cout.fill(default_fill);

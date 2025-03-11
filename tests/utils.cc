@@ -24,21 +24,21 @@ TEST_CASE("Parse arbitrary fields # two", "[cache]")
 
 TEST_CASE("wrap address outside upper bound", "[utils]")
 {
-	int address = MEM_SIZE + 25;
+	int address = MEM_LINES + 25;
 	int wrapped = wrap_address(address);
 	REQUIRE(wrapped == 25);
 }
 
 TEST_CASE("wrap address inside upper bound", "[utils]")
 {
-	int address = MEM_SIZE - 25;
+	int address = MEM_LINES - 25;
 	int wrapped = wrap_address(address);
-	REQUIRE(wrapped == MEM_SIZE - 25);
+	REQUIRE(wrapped == MEM_LINES - 25);
 }
 
 TEST_CASE("wrap address at upper bound", "[utils]")
 {
-	int address = MEM_SIZE;
+	int address = MEM_LINES;
 	int wrapped = wrap_address(address);
 	REQUIRE(wrapped == 0);
 }
@@ -47,14 +47,14 @@ TEST_CASE("wrap address lower than 0 with magnitude lesser than mem size", "[uti
 {
 	int address = -10;
 	int wrapped = wrap_address(address);
-	REQUIRE(wrapped == MEM_SIZE - 10);
+	REQUIRE(wrapped == MEM_LINES - 10);
 }
 
 TEST_CASE("wrap address lower than 0 but with magnitude greater than mem size", "[utils]")
 {
-	int address = -(MEM_SIZE + 10);
+	int address = -(MEM_LINES + 10);
 	int wrapped = wrap_address(address);
-	REQUIRE(wrapped == MEM_SIZE - 10);
+	REQUIRE(wrapped == MEM_LINES - 10);
 }
 
 TEST_CASE("wrap address at 0", "[utils]")

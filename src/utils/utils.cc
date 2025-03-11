@@ -31,7 +31,7 @@ const std::string string_format(const char *const zcFormat, ...)
 
 int wrap_address(int address) {
 	if (address < 0){
-		return ((address % MEM_SIZE) + MEM_SIZE) % MEM_SIZE;
+		return ((address % MEM_LINES) + MEM_LINES) % MEM_LINES;
 	}
-	return address % MEM_SIZE;
+	return address % MEM_LINES;
 }

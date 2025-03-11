@@ -135,7 +135,7 @@ void Cache::fetch_resource(int expected)
 			r = this->lower->write_line(
 				L1CACHE, actual,
 				((index << LINE_SPEC) +
-				 (meta->at(0) << (L1_CACHE_SPEC + LINE_SPEC))));
+				 (meta->at(0) << (L1_CACHE_LINE_SPEC + LINE_SPEC))));
 			if (r == OK) {
 				meta->at(1) = -1;
 			}
