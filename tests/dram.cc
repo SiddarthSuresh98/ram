@@ -186,7 +186,38 @@ TEST_CASE(
 	delete d;
 }
 
-TEST_CASE("Construct singleton dram, write a line to an address, read it in zero cycles", "[dram]")
+TEST_CASE("Construct singleton dram, write a line to an address", "[dram]")
+{
+	Dram *d = new Dram(1, 0);
+	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
+	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
+	CHECK(expected == actual);
+
+	signed int w = 0x11223311;
+	expected = {w, w+1, w+2, w+3};
+	int addr = 0x00000000;
+	d->write_line(expected, addr);
+
+	Response r = d->read(MEM, 0x00000000, actual);
+	CHECK(r == OK);
+	REQUIRE(expected == actual);
+
+	r = d->read(MEM, 0x00000001, actual);
+	CHECK(r == OK);
+	REQUIRE(expected == actual);
+
+	r = d->read(MEM, 0x00000002, actual);
+	CHECK(r == OK);
+	REQUIRE(expected == actual);
+
+	r = d->read(MEM, 0x00000003, actual);
+	CHECK(r == OK);
+	REQUIRE(expected == actual);
+
+	delete d;
+}
+
+TEST_CASE("Construct singleton dram, write a line to an address one element at a time, read it in zero cycles", "[dram]")
 {
 	Dram *d = new Dram(1, 0);
 	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
@@ -220,7 +251,7 @@ TEST_CASE("Construct singleton dram, write a line to an address, read it in zero
 	delete d;
 }
 
-TEST_CASE("Construct singleton dram, write a line to an address in 12 cycles, read it in three cycles", "[dram]")
+TEST_CASE("Construct singleton dram, write a line to an address one element at a time in 12 cycles, read it in three cycles", "[dram]")
 {
 	int delay = 3;
 	Dram *d = new Dram(1, delay);
@@ -257,7 +288,7 @@ TEST_CASE("Construct singleton dram, write a line to an address in 12 cycles, re
 }
 
 TEST_CASE(
-	"Construct singleton dram, store line in 12 cycles, read line in 3 cycles with no conflict","[dram]")
+	"Construct singleton dram, store line one element at a time in 12 cycles, read line in 3 cycles with no conflict","[dram]")
 {
 	int delay = 3;
 	Dram *d = new Dram(1, delay);
@@ -313,7 +344,7 @@ TEST_CASE(
 }
 
 TEST_CASE(
-	"Construct singleton dram, store line in 12 cycles, read line in 3 cycles with much conflict","[dram]")
+	"Construct singleton dram, store line one element at a time in 12 cycles, read line in 3 cycles with much conflict","[dram]")
 {
 	int delay = 3;
 	Dram *d = new Dram(1, delay);

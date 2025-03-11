@@ -23,7 +23,9 @@ class Dram : public Storage
 		int address,
 		std::array<signed int, LINE_SIZE> &data) override;
 
-  private:
+	void write_line(std::array<signed int, LINE_SIZE> data_line, int address);
+
+	private:
 	/**
 	 * Helper for `write`.
 	 */

@@ -25,6 +25,7 @@ class Cache : public Storage
 		Accessor accessor,
 		int address,
 		std::array<signed int, LINE_SIZE> &data) override;
+	Response read_word(Accessor accessor, int address, signed int &data);
 
 	/**
 	 * Getter for the meta attribute.
