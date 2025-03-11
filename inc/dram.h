@@ -21,10 +21,8 @@ class Dram : public Storage
 	Response read(
 		Accessor accessor,
 		int address,
-		std::array<signed int, LINE_SIZE> &data) override;
+		std::array<signed int, LINE_SIZE> &data_line) override;
 	Response write_line(Accessor accessor, std::array<signed int, LINE_SIZE> data_line, int address) override;
-
-	Response read(Accessor accessor, int address, std::array<signed int, LINE_SIZE>& data) override;
 	Response read_word(Accessor accessor, int address, signed int &data) override;
 
 	private:
@@ -40,7 +38,6 @@ class Dram : public Storage
 	 * Helper for `read` a line
 	 */
 	void do_read(std::array<signed int, LINE_SIZE> &data_line, int address);
-	void do_read(std::array<signed int, LINE_SIZE>& data_line, int address);
 	/**
 	 * Helper for reading a word.
 	 */

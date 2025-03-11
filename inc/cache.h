@@ -25,7 +25,7 @@ class Cache : public Storage
 	Response read(
 		Accessor accessor,
 		int address,
-		std::array<signed int, LINE_SIZE> &data) override;
+		std::array<signed int, LINE_SIZE> &data_line) override;
 	Response read_word(Accessor accessor, int address, signed int &data) override;
 
 	/**

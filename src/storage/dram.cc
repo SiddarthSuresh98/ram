@@ -94,7 +94,7 @@ Response Dram::write(Accessor accessor, signed int data, int address)
 	return r;
 }
 
-Response Dram::read(Accessor accessor, int address, std::array<signed int, LINE_SIZE>& data) { 
+Response Dram::read(Accessor accessor, int address, std::array<signed int, LINE_SIZE>& data_line) { 
 	Response r = WAIT;
 
 	if (this->requester == IDLE)
@@ -102,7 +102,7 @@ Response Dram::read(Accessor accessor, int address, std::array<signed int, LINE_
 
 	if (this->requester == accessor) {
 		if (this->wait_time == 0) {
-			this->do_read(data, address);
+			this->do_read(data_line, address);
 			r = OK;
 		}
 	}
