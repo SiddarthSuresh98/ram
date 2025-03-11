@@ -82,11 +82,11 @@ std::ostream &operator<<(std::ostream &os, const Dram &d)
 
 	std::vector<std::array<signed int, LINE_SIZE>> data = d.view(0, MEM_LINES);
 
-	os << " " << std::setfill(' ') << std::setw(MEM_LINE_SPEC + 2) << "INDEX"
+	os << " " << std::setfill(' ') << std::setw(MEM_LINE_SPEC + 2 + LINE_SPEC) << "ADDRESS"
 	   << " | " << std::setfill(' ') << std::setw((8 + 3) * 4 - 1) << "DATA"
 	   << std::endl;
 	for (int i = 0; i < MEM_LINES; ++i) {
-		os << " 0b" << std::setw(MEM_LINE_SPEC) << std::bitset<MEM_LINE_SPEC>(i) << " | ";
+		os << " 0b" << std::setw(MEM_LINE_SPEC+LINE_SPEC) << left << std::bitset<MEM_LINE_SPEC>(i) << " | ";
 		for (int j = 0; j < LINE_SIZE; ++j) {
 			os << "0x" << std::setfill('0') << std::setw(8) << std::hex
 			   << data.at(i).at(j) << ' ';
