@@ -1,6 +1,8 @@
 #ifndef DRAM_H
 #define DRAM_H
-#include <storage.h>
+#include "definitions.h"
+#include "storage.h"
+#include <ostream>
 
 class Dram : public Storage
 {
@@ -16,9 +18,12 @@ class Dram : public Storage
 	~Dram();
 
 	Response write(Accessor accessor, signed int data, int address) override;
-	Response read(Accessor accessor, int address, std::array<signed int, LINE_SIZE>& data) override;
+	Response read(
+		Accessor accessor,
+		int address,
+		std::array<signed int, LINE_SIZE> &data) override;
 
-	private:
+  private:
 	/**
 	 * Helper for `write`.
 	 */
@@ -26,8 +31,9 @@ class Dram : public Storage
 	/**
 	 * Helper for `read`.
 	 */
-	void do_read(std::array<signed int, LINE_SIZE>& data_line, int address);
+	void do_read(std::array<signed int, LINE_SIZE> &data_line, int address);
 };
 
-#endif /* DRAM_H_INCLUDED */
+std::ostream &operator<<(std::ostream &os, const Dram &d);
 
+#endif /* DRAM_H_INCLUDED */

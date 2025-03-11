@@ -1,187 +1,225 @@
 #include "cli.h"
-#include <sstream>
+#include "cache.h"
+#include "definitions.h"
+#include "dram.h"
+#include "response.h"
+#include "utils.h"
 #include <iostream>
-#include <vector>
 
-Cli::Cli() {
-    commands["load"] = [this](std::vector<std::string> args) {
-        if (args.size() >= 2){
-            try{
-                load(std::stoi(args[0]), std::stoi(args[1]));
-            } catch(const std::exception &e){
-                std::cerr << "Invalid input: " << e.what() << std::endl;
-            }
-        }
-        else {
-            std::cout << "Usage: load <memory-address> <pipeline-stage>\n";
-        }
-        return;
-    };
+Cli::Cli()
+{
+	this->cache = nullptr;
+	this->cycle = 0;
+	this->initialize();
 
-    commands["store"] = [this](std::vector<std::string> args) {
-        if (args.size() >= 3) {
-            try{
-                store(std::stoi(args[0]), std::stoi(args[1]), std::stoi(args[2]));
-            }catch(const std::exception &e) {
-                std::cerr << "Invalid input: " << e.what() << std::endl;
-            }
-        }
-        else {
-            std::cout << "Usage: store <memory-address> <pipeline-stage> <data>\n";
-        }
-        return;
-    };
+	commands['l'] = [this](std::vector<std::string> args) {
+		Accessor a;
+		if (args.size() >= 2) {
+			try {
+				a = match_accessor_or_die(args[0]);
+				load(a, std::stoi(args[1]));
+			} catch (const std::invalid_argument &e) {
+				std::cerr << "Invalid input: " << e.what() << std::endl;
+			}
+		} else {
+			std::cout << "Usage: l <memory-address>\n";
+		}
+		return;
+	};
 
-    commands["load-memory-image"] = [this](std::vector<std::string> args) {
-        if (!args.empty()) {
-            load_memory_image(args[0]);
-        }
-        else {
-            std::cout << "Usage: load-memory-image <filename>\n";
-        }
-        return;
-    };
+	commands['s'] = [this](std::vector<std::string> args) {
+		Accessor a;
+		if (args.size() >= 3) {
+			try {
+				a = match_accessor_or_die(args[0]);
+				store(a, std::stoi(args[1]), std::stoi(args[2]));
+			} catch (const std::invalid_argument &e) {
+				std::cerr << "Invalid input: " << e.what() << std::endl;
+			}
+		} else {
+			std::cout << "Usage: s <memory-address> <data>\n";
+		}
+		return;
+	};
 
-    commands["reset"] = [this](std::vector<std::string> args) { 
-        reset(); 
-        return; 
-    };
+	commands['r'] = [this](std::vector<std::string> args) {
+		reset();
+		return;
+	};
 
-    commands["update-memory"] = [this](std::vector<std::string> args) {
-        if (args.size() >= 2) {
-            try {
-                update_memory(std::stoi(args[0]), std::stoi(args[1]));
-            } catch(const std::exception &e){
-                std::cerr << "Invalid input: all arguments are integers" << e.what() << std::endl;
-            }
-        }
-        else{
-            std::cout << "Usage: update-memory <memory-address> <data>\n";
-        }
-        return;
-    };
+	commands['p'] = [this](std::vector<std::string> args) {
+		if (args.size() >= 1) {
+			try {
+				peek(std::stoi(args[0]));
+			} catch (const std::invalid_argument &e) {
+				std::cerr << "Invalid input: " << e.what() << std::endl;
+			}
+		} else {
+			std::cout << "Usage: v <storage-level> <base> <lines>\n";
+		}
+		return;
+	};
 
-    commands["view-memory"] = [this](std::vector<std::string> args) { 
-        view_memory();
-        return;
-    };
+	commands['c'] = [this](std::vector<std::string> args) {
+		clock();
+		return;
+	};
 
-    commands["view-memory-address"] = [this](std::vector<std::string> args) {
-        if (!args.empty()) {
-            try{
-                view_memory_address(std::stoi(args[0]));
-            }  catch(const std::exception &e){
-                std::cerr << "Invalid input: " << e.what() << std::endl;
-            }
-        }
-        else {
-            std::cout << "Usage: view-memory-address <memory-address>\n";
-        }
-        return;
-    };
-
-    commands["update-controls"] = [this](std::vector<std::string> args) {
-        if (!args.empty()) {
-            update_controls(args[0]);
-        }
-        else {
-            std::cout << "Usage: update-controls <configuration-file>\n";
-        }
-        return;
-    };
-
-    commands["help"] = [this](std::vector<std::string> args) { 
-        help();
-        return; 
-    };
+	commands['h'] = [this](std::vector<std::string> args) {
+		help();
+		return;
+	};
 }
 
-Cli::~Cli() {}
+Cli::~Cli() { delete this->cache; }
 
-//TODO: These function stubs are to be improved after they have been implemented internally.
-void Cli::help() {
-    std::cout << "Available commands:\n"
-              << "  load <memory-address> <pipeline-stage> - Load data from memory at specified address\n"
-              << "  store <memory-address> <pipeline-stage> <data> - Stores data into memory at specified address\n"
-              << "  load-memory-image <filename> - side door function that loads a memory image from a file and configures memory to the image\n"
-              << "  reset - side door function that resets the memory configuration and cycles\n"
-              << "  update-memory <memory-address> <data> - side door function that updates the memory at the specified address with data provided\n"
-              << "  view-memory - side door function that views the current status of the entire memory subsystem\n"
-              << "  view-memory-address <memory-address> - side door function that views data at specific memory address\n"
-              << "  update-controls <configuration-file> - side door function that takes in a configuration file and updates the controls\n"
-              << "  exit - Quits the program\n";
+void Cli::help()
+{
+	std::cout
+		<< "Available commands:" << std::endl
+		<< "  [l]oad <address> - Load data from memory at the specified "
+		   "address"
+		<< std::endl
+		<< "  [s]tore <accessor> <data> <address> - Stores data into memory at "
+		   "specified address. Acessor must be one of: [f]etch, [m]em"
+		<< "  [p]eek <storage-level> <base> <lines> - side door function that "
+		   "peeks the current status of the entire memory subsystem"
+		<< std::endl
+		<< std::endl
+		<< "  [c]ycle - manually advances the clock" << std::endl
+		<< "  [f]orce - advances the clock until one operation reports "
+		   "completion"
+		<< std::endl
+		<< "  [r]eset - side door function that resets the memory "
+		   "configuration and "
+		   "cycles"
+		<< std::endl
+		<< "  [h]elp  - prints this help text" << std::endl
+		<< "  [q]uit  - quits the program" << std::endl;
 }
 
-void Cli::load(int memory_address, int pipeline_stage) {
-    std::cout << "Loading data from memory address " << memory_address
-              << " at pipeline stage " << pipeline_stage << ".\n";
+void Cli::load(Accessor accessor, int address)
+{
+	const auto default_flags = std::cout.flags();
+	const auto default_fill = std::cout.fill();
+
+	signed int data;
+	// Response r = this->cache->read_word(accessor, address, data);
+	// std::cout << r << " to " << accessor << " reading " << address << std::endl;
+	// if (r == OK)
+	// 	std::cout << "\tGot:" << std::hex << data;
+
+	std::cout.flags(default_flags);
+	std::cout.fill(default_fill);
 }
 
-
-void Cli::store(int memory_address, int pipeline_stage, int data) {
-    std::cout << "Storing " << data << " into memory address " << memory_address
-              << " at pipeline stage " << pipeline_stage << ".\n";
+void Cli::store(Accessor accessor, int data, int address)
+{
+	Response r = this->cache->write(accessor, data, address);
+	std::cout << r << " to " << accessor << " storing " << data << " in"
+			  << address << std::endl;
 }
 
-
-void Cli::load_memory_image(const std::string& filename) {
-    std::cout << "Loading memory image from file: " << filename << ".\n";
+void Cli::clock()
+{
+	this->cache->resolve();
+	++this->cycle;
 }
 
-
-void Cli::reset() {
-    std::cout << "Resetting memory configuration and cycles.\n";
+void Cli::reset()
+{
+	this->initialize();
+	std::cout << "Done." << std::endl;
 }
 
+void Cli::peek(int level)
+{
+	Storage *curr = this->cache;
+	for (int i = 0; i < level; ++i) {
+		if (!curr) {
+			std::cerr << "Level " << level << " of storage does not exist."
+					  << std::endl;
+			return;
+		}
+		curr = curr->get_lower();
+	}
 
-void Cli::update_memory(int memory_address, int data) {
-    std::cout << "Updating memory at address " << memory_address
-              << " with data " << data << ".\n";
+	Cache *c = dynamic_cast<Cache *>(curr);
+	if (c) {
+		std::cout << *c << std::endl;
+	} else {
+		std::cout << *dynamic_cast<Dram *>(curr) << std::endl;
+		;
+	}
 }
 
+void Cli::run()
+{
+	std::cout << "Memory Command Processor Started. Type 'h' for a list of "
+				 "commands."
+			  << std::endl;
+	std::string input;
 
-void Cli::view_memory() {
-    std::cout << "Viewing current status of memory subsystem.\n";
+	bool run = true;
+	while (run) {
+		std::cout << this->cycle << "> ";
+		std::getline(std::cin, input);
+
+		std::istringstream iss1(input);
+		std::vector<std::string> words;
+		std::string sentence;
+		std::string word;
+
+		while (std::getline(iss1, sentence, ';')) {
+			words.clear();
+			std::istringstream iss2(sentence);
+
+			while (iss2 >> word) {
+				words.push_back(word);
+			}
+			if (words.empty())
+				continue;
+
+			std::string command = words[0];
+			words.erase(words.begin());
+
+			if (command == "q") {
+				run = false;
+				break;
+			}
+
+			auto it = commands.find(tolower(command[0]));
+			if (it != commands.end()) {
+				it->second(words);
+			} else {
+				std::cout << "Unknown command: '" << command
+						  << "'. Type 'help' for available commands."
+						  << std::endl;
+			}
+		}
+	}
 }
 
+void Cli::initialize()
+{
+	Logger *global_log = Logger::getInstance();
 
-void Cli::view_memory_address(int memory_address) {
-    std::cout << "Viewing data at memory address " << memory_address << ".\n";
+	global_log->log(INFO, "Resetting memory configuration and cycle.");
+
+	if (this->cache != nullptr)
+		delete this->cache;
+
+	Dram *d = new Dram(MEM_SIZE, MEM_DELAY);
+	this->cache = new Cache(d, L1_CACHE_DELAY);
+	this->cycle = 1;
 }
 
-
-void Cli::update_controls(const std::string& config_file) {
-    std::cout << "Updating controls using configuration file: " << config_file << ".\n";
+Accessor Cli::match_accessor_or_die(std::string s)
+{
+	if (tolower(s[0]) == 'f')
+		return FETCH;
+	else if (tolower(s[0]) == 'm')
+		return MEM;
+	else
+		throw std::invalid_argument(s);
 }
-
-void Cli::run(){
-    std::cout << "Memory Command Processor Started. Type 'help' for a list of commands.\n";
-
-    std::string input;
-    while (true) {
-        std::cout << "> ";
-        std::getline(std::cin, input);
-        std::istringstream iss(input);
-        std::vector<std::string> tokens;
-        std::string word;
-
-        while (iss >> word) tokens.push_back(word);
-        if (tokens.empty()) continue;
-
-        std::string command = tokens[0];
-        tokens.erase(tokens.begin());
-
-        if (command == "exit") {
-            std::cout << "Exiting...\n";
-            break;
-        }
-
-        auto it = commands.find(command);
-        if (it != commands.end()) {
-            it->second(tokens);
-        } else {
-            std::cout << "Unknown command. Type 'help' for available commands.\n";
-        }
-    }
-}
-

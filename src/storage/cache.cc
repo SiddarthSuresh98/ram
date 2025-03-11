@@ -3,6 +3,9 @@
 #include "response.h"
 #include "utils.h"
 #include <bits/stdc++.h>
+#include <bitset>
+#include <iostream>
+#include <iterator>
 
 Cache::Cache(Storage *lower, int delay)
 {
@@ -16,7 +19,11 @@ Cache::Cache(Storage *lower, int delay)
 	this->wait_time = this->delay;
 }
 
-Cache::~Cache() { delete this->data; }
+Cache::~Cache()
+{
+	delete this->lower;
+	delete this->data;
+}
 
 Response Cache::write(Accessor accessor, signed int data, int address)
 {
@@ -75,4 +82,42 @@ void Cache::fetch_resource(int expected)
 	}
 
 	this->is_waiting = (r == OK) ? false : true;
+}
+
+std::array<std::array<int, 2>, L1_CACHE_SIZE> Cache::get_meta() const
+{
+	std::array<std::array<int, 2>, L1_CACHE_SIZE> ret;
+	std::copy(std::begin(this->meta), std::end(this->meta), std::begin(ret));
+	return ret;
+}
+
+std::ostream &operator<<(std::ostream &os, const Cache &c)
+{
+	const auto default_flags = std::cout.flags();
+	const auto default_fill = std::cout.fill();
+
+	std::vector<std::array<signed int, LINE_SIZE>> data =
+		c.view(0, L1_CACHE_SIZE);
+	std::array<std::array<int, 2>, L1_CACHE_SIZE> meta = c.get_meta();
+
+	os << " " << std::setfill(' ') << std::setw(L1_CACHE_SPEC + 2) << "INDEX"
+	   << " | " << std::setfill(' ') << std::setw((8 + 3) * 4 - 1) << "DATA"
+	   << " | " << std::setfill(' ')
+	   << std::setw(MEM_SPEC - LINE_SPEC - L1_CACHE_SPEC + 2) << "TAG"
+	   << " | D" << std::endl;
+	for (int i = 0; i < L1_CACHE_SIZE; ++i) {
+		os << " 0b" << std::setw(L1_CACHE_SPEC) << std::bitset<L1_CACHE_SPEC>(i)
+		   << " | ";
+		for (int j = 0; j < LINE_SIZE; ++j) {
+			os << "0x" << std::setfill('0') << std::setw(8) << std::hex
+			   << data.at(i).at(j) << " ";
+		}
+		os << "| 0x" << std::setfill(' ')
+		   << std::bitset<MEM_SPEC - LINE_SPEC - L1_CACHE_SPEC>(meta.at(i)[0])
+		   << " | " << (int)(meta.at(i)[0] >= 0) << std::endl;
+	}
+
+	std::cout.flags(default_flags);
+	std::cout.fill(default_fill);
+	return os;
 }

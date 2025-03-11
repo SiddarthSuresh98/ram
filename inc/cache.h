@@ -3,6 +3,7 @@
 #include "definitions.h"
 #include "storage.h"
 #include <array>
+#include <ostream>
 
 class Cache : public Storage
 {
@@ -25,6 +26,13 @@ class Cache : public Storage
 		int address,
 		std::array<signed int, LINE_SIZE> &data) override;
 
+	/**
+	 * Getter for the meta attribute.
+	 * TODO this doesn't seem like good object-oriented practice.
+	 * @return this->meta
+	 */
+	std::array<std::array<int, 2>, L1_CACHE_SIZE> get_meta() const;
+
   private:
 	/**
 	 * Fetches `address` from a lower level of storage if it is not already
@@ -41,5 +49,7 @@ class Cache : public Storage
 	 */
 	std::array<std::array<int, 2>, L1_CACHE_SIZE> meta;
 };
+
+std::ostream &operator<<(std::ostream &os, const Cache &c);
 
 #endif /* CACHE_H_INCLUDED */

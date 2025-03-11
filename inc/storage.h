@@ -1,22 +1,18 @@
 #ifndef STORAGE_H
 #define STORAGE_H
+#include "accessor.h"
 #include "definitions.h"
 #include "response.h"
 #include <algorithm>
 #include <array>
+#include <map>
 #include <vector>
-
-enum Accessor {
-	IDLE,
-	MEM,
-	FETCH,
-	L1CACHE,
-	SIDE,
-};
 
 class Storage
 {
   public:
+	virtual ~Storage() = default;
+
 	/**
 	 * Write `data` into `address`.
 	 * @param the source making the request.
@@ -43,11 +39,19 @@ class Storage
 	 * @return A matrix of data values, where each row is a line and each column
 	 * is a word.
 	 */
-	std::vector<std::array<signed int, LINE_SIZE>> view(int base, int lines);
+	std::vector<std::array<signed int, LINE_SIZE>>
+	view(int base, int lines) const;
 	/**
-	 * Advances to the next job if the current job is completed.
+	 * Refreshes the state of this storage device and lower.
 	 */
 	void resolve();
+
+	/**
+	 * Getter for lower attribute.
+	 * TODO this doesn't seem like good object-oriented practice.
+	 * @return this->lower
+	 */
+	Storage *get_lower();
 
   protected:
 	/**

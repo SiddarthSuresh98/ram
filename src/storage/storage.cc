@@ -3,7 +3,7 @@
 #include <algorithm>
 
 std::vector<std::array<signed int, LINE_SIZE>>
-Storage::view(int base, int lines)
+Storage::view(int base, int lines) const
 {
 	base = (base / LINE_SIZE) * LINE_SIZE;
 	std::vector<std::array<signed int, LINE_SIZE>> ret(lines + 1);
@@ -13,8 +13,12 @@ Storage::view(int base, int lines)
 	return ret;
 }
 
+Storage *Storage::get_lower() { return this->lower; }
+
 void Storage::resolve()
 {
+	if (this->lower)
+		this->lower->resolve();
 	if (this->wait_time == 0) {
 		this->requester = IDLE;
 		this->wait_time = delay;

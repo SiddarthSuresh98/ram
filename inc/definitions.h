@@ -1,5 +1,6 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
+#include "logger.h"
 #include <cmath>
 
 /**
@@ -9,17 +10,17 @@
 /**
  * The total number of words in a line
  */
-#define LINE_SIZE (int)pow(2, 2)
+#define LINE_SIZE static_cast<int>(pow(2, 2))
 
 /**
  * The number of bits to specify a memory line
  * calculated as: (/ (expt 2 15) 4)
  */
-#define MEM_SPEC 13
+#define MEM_SPEC 8
 /**
  * The total number of words in memory
  */
-#define MEM_SIZE (int)pow(2, MEM_SPEC)
+#define MEM_SIZE static_cast<int>(pow(2, MEM_SPEC))
 
 /**
  * The number of bits to specify a l1 cache line
@@ -28,7 +29,17 @@
 /**
  * The total number of words in l1 cache
  */
-#define L1_CACHE_SIZE (int)pow(2, L1_CACHE_SPEC)
+#define L1_CACHE_SIZE static_cast<int>(pow(2, L1_CACHE_SPEC))
+
+/**
+ * The total number of cycles a memory access takes.
+ */
+#define MEM_DELAY 4
+
+/**
+ * The total number of cycles a level one cache access takes
+ */
+#define L1_CACHE_DELAY 1
 
 /**
  * Return the N least-significant bits from integer K using a bit mask
