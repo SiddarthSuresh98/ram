@@ -5,6 +5,10 @@
 #include <sstream>
 using namespace std;
 
+LogLevel Logger::level = INFO;
+ofstream Logger::logFile;
+Logger *Logger::logger_instance;
+
 Logger::Logger(const string &filename)
 {
 	if (!filename.empty()) {
@@ -17,11 +21,11 @@ Logger::Logger(const string &filename)
 
 Logger::~Logger() { logFile.close(); }
 
-void Logger::setLevel(LogLevel level) { this->level = level; }
+void Logger::setLevel(LogLevel level) { level = level; }
 
 void Logger::log(LogLevel level, const string &message)
 {
-	if (levelToInt(level) > levelToInt(this->level)) {
+	if (level_to_int(level) > level_to_int(level)) {
 		return;
 	}
 
@@ -31,7 +35,7 @@ void Logger::log(LogLevel level, const string &message)
 	strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", timeinfo);
 
 	ostringstream logEntry;
-	logEntry << "[" << timestamp << "] " << levelToString(level) << ": "
+	logEntry << "[" << timestamp << "] " << level_to_string(level) << ": "
 			 << message << endl;
 
 	cout << logEntry.str();
@@ -42,7 +46,15 @@ void Logger::log(LogLevel level, const string &message)
 	}
 }
 
-string Logger::levelToString(LogLevel level)
+Logger *Logger::getInstance()
+{
+	if (logger_instance == nullptr) {
+		logger_instance = new Logger("vector.log");
+	}
+	return logger_instance;
+}
+
+string Logger::level_to_string(LogLevel level)
 {
 	switch (level) {
 	case DEBUG:
@@ -60,7 +72,7 @@ string Logger::levelToString(LogLevel level)
 	}
 }
 
-int Logger::levelToInt(LogLevel level)
+int Logger::level_to_int(LogLevel level)
 {
 	switch (level) {
 	case DEBUG:

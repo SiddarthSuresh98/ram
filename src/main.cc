@@ -31,26 +31,26 @@ static void err()
 			  << std::endl;
 }
 
-static void parseArguments(int argc, char **argv, Logger &logger, bool &python)
+static void parseArguments(int argc, char **argv, bool &python)
 {
+	Logger *logger = Logger::getInstance();
 	struct option long_options[] = {
 		{"debug", no_argument, 0, 'd'},
 		{"no-python", no_argument, 0, 'p'},
-		{"version", no_argument, 0, 'v'},
 		{0, 0, 0, 0}};
 
 	python = true;
 
 	int opt;
 
-	while ((opt = getopt_long(argc, argv, "d:p:v", long_options, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "d:p", long_options, NULL)) != -1) {
 		switch (opt) {
 		case 'd':
-			logger.setLevel(DEBUG);
-			logger.log(DEBUG, "DEBUG output enabled.");
+			logger->setLevel(DEBUG);
+			logger->log(DEBUG, "DEBUG output enabled.");
 			break;
 		case 'p':
-			logger.log(INFO, "Python will NOT be started!");
+			logger->log(INFO, "Python will NOT be started!");
 			python = false;
 			break;
 		case 'v':
@@ -66,17 +66,17 @@ static void parseArguments(int argc, char **argv, Logger &logger, bool &python)
 int main(int argc, char **argv)
 {
 	print_version_number();
-	Logger logger("vector.log");
+	Logger *logger = Logger::getInstance();
 	Cli cli;
-	logger.log(INFO, "Initializing...");
+	logger->log(INFO, "Initializing...");
 
 	bool python = true;
-	parseArguments(argc, argv, logger, python);
+	parseArguments(argc, argv, python);
 
 	if (python) {
 		// fork off python here
 		;
-		logger.log(INFO, "Python started.");
+		logger->log(INFO, "Python started.");
 	}
 
 	cli.run();

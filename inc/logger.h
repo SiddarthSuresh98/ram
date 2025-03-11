@@ -9,13 +9,14 @@ enum LogLevel { DEBUG, INFO, WARNING, ERROR, CRITICAL };
 class Logger
 {
   public:
-	/**
-	 * Constructor.
-	 * @param The file name to log to.
-	 * @return A new logger object.
-	 */
-	Logger(const string &);
+	static Logger* getInstance();
+
 	~Logger();
+
+	/**
+	 * Do not allow copies.
+	 */
+	Logger(const Logger& obj) = delete;
 
 	/**
 	 * Set the log level.
@@ -31,10 +32,17 @@ class Logger
 	void log(LogLevel, const string &);
 
   private:
-	LogLevel level = INFO;
-	ofstream logFile;
-	string levelToString(LogLevel);
-	int levelToInt(LogLevel);
+	/**
+	 * Constructor.
+	 * @param The file name to log to.
+	 * @return A new logger object.
+	 */
+	Logger(const string &);
+	static Logger* logger_instance;
+	static LogLevel level;
+	static ofstream logFile;
+	static string level_to_string(LogLevel);
+	static int level_to_int(LogLevel);
 };
 
 #endif /* LOGGER_H_INCLUDED */
