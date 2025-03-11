@@ -1,7 +1,6 @@
 #ifndef CACHE_H
 #define CACHE_H
 #include "definitions.h"
-#include "operation.h"
 #include "storage.h"
 #include <array>
 #include <ostream>
@@ -43,7 +42,7 @@ class Cache : public Storage
 	 * cache level to true, and the victim line is chosen/written back.
 	 * @param the address that must be present in cache.
 	 */
-	void fetch_resource(Operation op, int address);
+	void fetch_resource(int address);
 	/**
 	 * An array of metadata about elements in `data`.
 	 * If the first value of an element is negative, the corresponding
