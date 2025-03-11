@@ -186,7 +186,187 @@ TEST_CASE(
 	delete d;
 }
 
-TEST_CASE("Construct singleton dram, write a line to an address", "[dram]")
+TEST_CASE(
+	"Construct singleton dram, store line in zero cycles", "[dram]")
+{
+	Dram *d = new Dram(1, 0);
+	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
+	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
+	CHECK(expected == actual);
+
+	signed int w = 0x11223344;
+	expected = {w, w+1, w+2, w+3};
+
+	Response r = d->write_line(MEM, expected, 0x00000000);
+	CHECK(r == OK);
+
+	actual = d->view(0, 1)[0];
+	REQUIRE(expected == actual);
+
+	delete d;
+}
+
+TEST_CASE(
+	"Construct singleton dram, store line in three cycles", "[dram]")
+{
+	int delay = 3;
+	Dram *d = new Dram(1, delay);
+	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
+	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
+	CHECK(expected == actual);
+
+	signed int w = 0x11223344;
+	std::array<signed int, LINE_SIZE> written_line = {w, w+1, w+2, w+3};
+
+	int i;
+	Response r;
+	for (i = 0; i < delay; ++i) {
+		r = d->write_line(MEM, written_line, 0x00000000);
+		CHECK(r == WAIT);
+
+		actual = d->view(0, 1)[0];
+		REQUIRE(expected == actual);
+		d->resolve();
+	}
+
+	r = d->write_line(MEM, written_line, 0x00000000);
+	CHECK(r == OK);
+	d->resolve();
+
+	expected = written_line;
+	actual = d->view(0, 1)[0];
+	REQUIRE(expected == actual);
+
+	delete d;
+}
+
+TEST_CASE(
+	"Construct singleton dram, store line in three cycles no "
+	"conflict",
+	"[dram]")
+{
+	int delay = 3;
+	Dram *d = new Dram(1, delay);
+	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
+	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
+	CHECK(expected == actual);
+
+	signed int w = 0x11223344;
+	std::array<signed int, LINE_SIZE> written_line = {w, w+1, w+2, w+3};
+
+	int i;
+	Response r;
+	for (i = 0; i < delay; ++i) {
+		r = d->write_line(MEM, written_line, 0x00000000);
+		CHECK(r == WAIT);
+
+		actual = d->view(0, 1)[0];
+		REQUIRE(expected == actual);
+		d->resolve();
+	}
+
+	r = d->write_line(MEM, written_line, 0x00000000);
+	REQUIRE(r == OK);
+	// clock cycle did NOT resolve yet!
+	// this fetch should not make progress
+	r = d->write_line(FETCH, written_line, 0x00000001);
+	CHECK(r == WAIT);
+
+	actual = d->view(0, 1)[0];
+	CHECK(r == WAIT);
+	d->resolve();
+
+	expected = written_line;
+	actual = d->view(0, 1)[0];
+	REQUIRE(expected == actual);
+
+	written_line = {w+4, w+5, w+6, w+7};
+
+	for (i = 0; i < delay; ++i) {
+		r = d->write_line(FETCH, written_line, 0x00000001);
+		CHECK(r == WAIT);
+
+		actual = d->view(0, 1)[0];
+		REQUIRE(expected == actual);
+		d->resolve();
+	}
+
+	r = d->write_line(FETCH, written_line, 0x00000001);
+	actual = d->view(0, 1)[0];
+	CHECK(r == OK);
+
+	expected = written_line;
+	actual = d->view(0, 1)[0];
+	REQUIRE(expected == actual);
+
+	delete d;
+}
+
+TEST_CASE(
+	"Construct singleton dram, store line in three cycles much "
+	"conflict",
+	"[dram]")
+{
+	int delay = 2;
+	Dram *d = new Dram(1, 2);
+	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
+	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
+	CHECK(expected == actual);
+
+	signed int w = 0x11223344;
+	std::array<signed int, LINE_SIZE> written_line = {w, w+1, w+2, w+3};
+
+	int i;
+	Response r;
+	for (i = 0; i < delay; ++i) {
+		r = d->write_line(MEM, written_line, 0x00000000);
+		CHECK(r == WAIT);
+
+		r = d->write_line(FETCH, written_line, 0x00000001);
+		CHECK(r == WAIT);
+
+		actual = d->view(0, 1)[0];
+		REQUIRE(expected == actual);
+		d->resolve();
+	}
+
+	r = d->write_line(MEM, written_line, 0x00000000);
+	CHECK(r == OK);
+	r = d->write_line(FETCH, written_line, 0x00000001);
+	CHECK(r == WAIT);
+	d->resolve();
+
+	actual = d->view(0, 1)[0];
+	expected = written_line;
+	REQUIRE(expected == actual);
+
+	written_line = {w+4, w+5, w+6, w+7};
+	for (i = 0; i < delay; ++i) {
+		r = d->write_line(FETCH, written_line, 0x00000001);
+		CHECK(r == WAIT);
+
+		r = d->write_line(MEM, written_line, 0x00000003);
+		CHECK(r == WAIT);
+
+		actual = d->view(0, 1)[0];
+		REQUIRE(expected == actual);
+		d->resolve();
+	}
+
+	r = d->write_line(FETCH, written_line, 0x00000001);
+	actual = d->view(0, 1)[0];
+	CHECK(r == OK);
+	r = d->write_line(MEM, written_line, 0x00000003);
+	CHECK(r == WAIT);
+
+	expected = written_line;
+	actual = d->view(0, 1)[0];
+	REQUIRE(expected == actual);
+
+	delete d;
+}
+
+TEST_CASE("Construct singleton dram, write a line to an address in 0 cycles, read in 0 cycles", "[dram]")
 {
 	Dram *d = new Dram(1, 0);
 	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
@@ -216,6 +396,160 @@ TEST_CASE("Construct singleton dram, write a line to an address", "[dram]")
 
 	delete d;
 }
+
+TEST_CASE("Construct singleton dram, write a line to an address in three cycles, read it in three cycles", "[dram]")
+{
+	int delay = 3;
+	Dram *d = new Dram(1, delay);
+	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
+	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
+	CHECK(expected == actual);
+
+	signed int w = 0x11223311;
+	expected = {w, w+1, w+2, w+3};
+	int addr = 0x00000000;
+	
+	int i;
+	Response r;
+	
+	for(i=0; i<delay; ++i) {
+		r = d->write_line(MEM, expected, addr);
+		d->resolve();
+	}
+	r = d->write_line(MEM, expected, addr);
+	d->resolve();
+
+	for (i = 0; i < delay; ++i) {
+		r = d->read(MEM, 0x00000000, actual);
+		CHECK(r == WAIT);
+		REQUIRE(expected != actual);
+		d->resolve();
+	}
+
+	r = d->read(MEM, 0x00000000, actual);
+	CHECK(r == OK);
+	d->resolve();
+	REQUIRE(expected == actual);
+	delete d;
+}
+
+TEST_CASE(
+	"Construct singleton dram, store line in 3 cycles, read line in 3 cycles with no conflict","[dram]")
+{
+	int delay = 3;
+	Dram *d = new Dram(1, delay);
+	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
+	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
+	CHECK(expected == actual);
+
+	signed int w = 0x11223311;
+	expected = {w, w+1, w+2, w+3};
+	int addr = 0x00000000;
+	
+	int i;
+	Response r;
+	for(int j=0; j<delay; ++j) {
+		r = d->write_line(MEM, expected, addr);
+		d->resolve();
+	}
+	r = d->write_line(MEM, expected, addr++);
+	d->resolve();
+
+	for (i = 0; i < delay; ++i) {
+		r = d->read(MEM, 0x00000000, actual);
+		CHECK(r == WAIT);
+		REQUIRE(expected != actual);
+		d->resolve();
+	}
+
+	r = d->read(MEM, 0x00000000, actual);
+	REQUIRE(r == OK);
+	r = d->read(FETCH, 0x00000003, actual);
+	CHECK(r == WAIT); 
+	d->resolve();
+	REQUIRE(expected == actual);
+
+	actual = {0,0,0,0};
+	for (i = 0; i < delay; ++i) {
+		r = d->read(FETCH, 0x00000000, actual);
+		CHECK(r == WAIT);
+		REQUIRE(expected != actual);
+		d->resolve();
+	}
+
+	r = d->read(FETCH, 0x00000000, actual);
+	REQUIRE(r == OK);
+	r = d->read(MEM, 0x00000002, actual);
+	CHECK(r == WAIT);
+	d->resolve();
+	REQUIRE(expected == actual);
+	
+	delete d;
+
+}
+
+TEST_CASE(
+	"Construct singleton dram, store line in 3 cycles, read line in 3 cycles with much conflict","[dram]")
+{
+	int delay = 3;
+	Dram *d = new Dram(1, delay);
+	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
+	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
+	CHECK(expected == actual);
+
+	signed int w = 0x11223311;
+	expected = {w, w+1, w+2, w+3};
+	int addr = 0x00000000;
+	
+	int i;
+	Response r;
+	for(int j=0; j<delay; ++j) {
+		r = d->write_line(MEM, expected, addr);
+		d->resolve();
+	}
+	r = d->write_line(MEM, expected, addr++);
+	d->resolve();
+
+
+	for (i = 0; i < delay; ++i) {
+		r = d->read(MEM, 0x00000000, actual);
+		CHECK(r == WAIT);
+		REQUIRE(expected != actual);
+		r = d->read(FETCH, 0x00000002, actual);
+		CHECK(r == WAIT);
+		REQUIRE(expected != actual);
+		d->resolve();
+	}
+
+	r = d->read(MEM, 0x00000000, actual);
+	REQUIRE(r == OK);
+	r = d->read(FETCH, 0x00000003, actual);
+	CHECK(r == WAIT); 
+	d->resolve();
+	REQUIRE(expected == actual);
+
+	actual = {0,0,0,0};
+	for (i = 0; i < delay; ++i) {
+		r = d->read(FETCH, 0x00000000, actual);
+		CHECK(r == WAIT);
+		REQUIRE(expected != actual);
+		r = d->read(MEM, 0x00000002, actual);
+		CHECK(r == WAIT);
+		REQUIRE(expected != actual);
+		d->resolve();
+	}
+
+	r = d->read(FETCH, 0x00000000, actual);
+	REQUIRE(r == OK);
+	r = d->read(MEM, 0x00000002, actual);
+	CHECK(r == WAIT);
+	d->resolve();
+	REQUIRE(expected == actual);
+	
+	delete d;
+
+}
+
 
 TEST_CASE("Construct singleton dram, write a line to an address one element at a time, read it in zero cycles", "[dram]")
 {

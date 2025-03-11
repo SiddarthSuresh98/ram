@@ -20,4 +20,6 @@ void get_bit_fields(int address, int *tag, int *index, int *offset);
  */
 const std::string string_format(const char *const zcFormat, ...);
 
+int wrap_address(int address);
+
 #endif /* UTILS_H_INCLUDED */
