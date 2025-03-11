@@ -3,6 +3,9 @@ project(risc_vector)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+add_compile_options(-Wall -lstdc++)
+add_compile_options(-Wextra -Wpedantic)
+
 # cpp standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

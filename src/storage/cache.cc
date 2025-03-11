@@ -100,7 +100,6 @@ std::ostream &operator<<(std::ostream &os, const Cache &c)
 		c.view(0, L1_CACHE_SIZE);
 	std::array<std::array<int, 2>, L1_CACHE_SIZE> meta = c.get_meta();
 
-	cout << data.capacity();
 	os << " " << std::setfill(' ') << std::setw(L1_CACHE_SPEC + 2) << "INDEX"
 	   << " | " << std::setfill(' ') << std::setw((8 + 3) * 4 - 1) << "DATA"
 	   << " | " << std::setfill(' ')

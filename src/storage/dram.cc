@@ -83,7 +83,6 @@ std::ostream &operator<<(std::ostream &os, const Dram &d)
 	std::vector<std::array<signed int, LINE_SIZE>> data =
 		d.view(0, MEM_SIZE);
 
-	cout << data.capacity();
 	os << " " << std::setfill(' ') << std::setw(MEM_SPEC + 2) << "INDEX"
 	   << " | " << std::setfill(' ') << std::setw((8 + 3) * 4 - 1) << "DATA" << '\n';
 	for (int i = 0; i < MEM_SIZE; ++i) {

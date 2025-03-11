@@ -25,13 +25,14 @@ class Cli
 	 * @param memory_address address of the memory where data needs to be loaded
 	 * from
 	 */
-	void load(int memory_address);
+	void load(Accessor accessor, int memory_address);
 
 	/**
 	 * Stores data into memory at the specified address.
 	 * @param accessor the pipline stage that is making this request
 	 * @param data data value to be written to the memory
 	 * @param address address of the memory where data needs to be stored
+	 * @return the response from the storage device
 	 */
 	void store(Accessor accessor, int data, int address);
 
@@ -41,15 +42,6 @@ class Cli
 	 * allowing the user to reset the memory configuration directly.
 	 */
 	void reset();
-
-	/**
-	 * Updates the memory at the specified address with the given data.
-	 * This function provides a side door modification interface to the memory
-	 * system, allowing the user to modify the memory configuration directly.
-	 * @param memory_address address of the memory to be updated
-	 * @param data data value to be written to the memory
-	 */
-	void update(int memory_address, int data);
 
 	/**
 	 * Advance the clock one cycle, refreshing the storage devices.
@@ -79,17 +71,27 @@ class Cli
 	 * Initializes the cache object.
 	 */
 	void initialize();
+	/**
+	 * Attempts to match string to either fetch or mem, or throws
+	 * std::invalid_argument otherwise.
+	 * @param the string to be converted accessor
+	 * @return the corresponding accessor
+	 * @throws invalid_argument if the string is not fetch or mem
+	 */
+	Accessor match_accessor_or_die(std::string s);
 	/** Map of commands and their corresponding functions.
 	 * This map is used to store the commands and their corresponding functions.
 	 */
-	std::unordered_map<
-		std::string,
-		std::function<void(std::vector<std::string>)>>
+	std::unordered_map<char, std::function<void(std::vector<std::string>)>>
 		commands;
 	/**
 	 * The cache object to interface with.
 	 */
 	Cache *cache;
+	/**
+	 * The current cycle.
+	 */
+	int cycle;
 };
 
 #endif /* CLI_H_INCLUDED */

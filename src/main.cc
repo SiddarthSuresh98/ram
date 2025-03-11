@@ -21,7 +21,7 @@ static std::string banner =
   "_/      _/  _/    _/_/_/    _/            _/      _/    _/  _/_/_/      _/     \n"
   " _/  _/    _/    _/        _/            _/      _/    _/  _/    _/    _/      \n"
   "  _/      _/    _/_/_/_/    _/_/_/      _/        _/_/    _/    _/    _/       \n"
-  "         _/_/                                                      _/_/        \n";
+  "         _/_/                                                      _/_/    ";
 static void print_version_number() { std::cout << banner << version_number << '\n'; }
 
 static void err()
@@ -79,5 +79,8 @@ int main(int argc, char **argv)
 	}
 
 	cli.run();
+
+	global_log->log(INFO, "Cleaning up...");
+	global_log->log(INFO, "Goodbye!");
 	return EXIT_SUCCESS;
 }
