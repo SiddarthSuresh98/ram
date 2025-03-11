@@ -17,21 +17,37 @@ class Dram : public Storage
 	Dram(int lines, int delay);
 	~Dram();
 
-	Response write(Accessor accessor, signed int data, int address) override;
-	Response read(
+	Response
+	write_word(Accessor accessor, signed int data, int address) override;
+	Response read_line(
 		Accessor accessor,
 		int address,
-		std::array<signed int, LINE_SIZE> &data) override;
+		std::array<signed int, LINE_SIZE> &data_line) override;
+	Response write_line(
+		Accessor accessor,
+		std::array<signed int, LINE_SIZE> data_line,
+		int address) override;
+	Response
+	read_word(Accessor accessor, int address, signed int &data) override;
 
   private:
 	/**
-	 * Helper for `write`.
+	 * Helper for `write` a word
 	 */
 	void do_write(signed int, int);
 	/**
-	 * Helper for `read`.
+	 * Helper for writing a line.
+	 */
+	void
+	do_write_line(std::array<signed int, LINE_SIZE> data_line, int address);
+	/**
+	 * Helper for `read` a line
 	 */
 	void do_read(std::array<signed int, LINE_SIZE> &data_line, int address);
+	/**
+	 * Helper for reading a word.
+	 */
+	void do_read_word(signed int &data, int address);
 };
 
 std::ostream &operator<<(std::ostream &os, const Dram &d);

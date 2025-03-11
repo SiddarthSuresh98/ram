@@ -25,7 +25,7 @@ Cache::~Cache()
 	delete this->data;
 }
 
-Response Cache::write(Accessor accessor, signed int data, int address)
+Response Cache::write_word(Accessor accessor, signed int data, int address)
 {
 	Response r = WAIT;
 
@@ -49,10 +49,71 @@ Response Cache::write(Accessor accessor, signed int data, int address)
 	return r;
 }
 
-Response Cache::read(
-	Accessor accessor, int address, std::array<signed int, LINE_SIZE> &data)
+Response Cache::write_line(
+	Accessor accessor, std::array<signed int, LINE_SIZE> data_line, int address)
 {
-	return WAIT;
+	Response r = WAIT;
+
+	/* Do this first--then process the first cycle immediately. */
+	if (this->requester == IDLE)
+		this->requester = accessor;
+
+	if (this->requester == accessor) {
+		fetch_resource(address);
+		if (this->is_waiting)
+			r = BLOCKED;
+		else if (this->wait_time == 0) {
+			int tag, index, offset;
+			get_bit_fields(address, &tag, &index, &offset);
+			this->data->at(index) = data_line;
+			this->meta[index].at(1) = 1;
+			r = OK;
+		}
+	}
+
+	return r;
+}
+
+// TODO: tests for multi level cache
+Response Cache::read_line(
+	Accessor accessor,
+	int address,
+	std::array<signed int, LINE_SIZE> &data_line)
+{
+	Response r = WAIT;
+	if (this->requester == IDLE)
+		this->requester = accessor;
+	if (this->requester == accessor) {
+		fetch_resource(address);
+		if (this->is_waiting)
+			r = BLOCKED;
+		else if (this->wait_time == 0) {
+			int tag, index, offset;
+			get_bit_fields(address, &tag, &index, &offset);
+			data_line = this->data->at(index);
+			r = OK;
+		}
+	}
+	return r;
+}
+
+Response Cache::read_word(Accessor accessor, int address, signed int &data)
+{
+	Response r = WAIT;
+	if (this->requester == IDLE)
+		this->requester = accessor;
+	if (this->requester == accessor) {
+		fetch_resource(address);
+		if (this->is_waiting)
+			r = BLOCKED;
+		else if (this->wait_time == 0) {
+			int tag, index, offset;
+			get_bit_fields(address, &tag, &index, &offset);
+			data = this->data->at(index).at(offset);
+			r = OK;
+		}
+	}
+	return r;
 }
 
 void Cache::fetch_resource(int expected)
@@ -64,19 +125,24 @@ void Cache::fetch_resource(int expected)
 
 	get_bit_fields(expected, &tag, &index, &offset);
 	meta = &this->meta.at(index);
+	actual = this->data->at(index);
 
 	if (meta->at(0) != tag) {
 		// address not in cache
 		if (meta->at(1) >= 0) {
 			// occupant is dirty
-			// TODO
-			r = WAIT;
+			// writing line to DRam in case of dirty cache eviction
+			r = this->lower->write_line(
+				L1CACHE, actual,
+				((index << LINE_SPEC) +
+				 (meta->at(0) << (L1_CACHE_SPEC + LINE_SPEC))));
+			if (r == OK) {
+				meta->at(1) = -1;
+			}
 		} else {
-			actual = this->data->at(index);
-			r = this->lower->read(L1CACHE, expected, actual);
+			r = this->lower->read_line(L1CACHE, expected, actual);
 			if (r == OK) {
 				meta->at(0) = tag;
-				meta->at(1) = -1;
 			}
 		}
 	}

@@ -20,7 +20,7 @@ Dram::Dram(int lines, int delay)
 
 Dram::~Dram() { delete this->data; }
 
-void Dram::do_write(signed data, int address)
+void Dram::do_write(signed int data, int address)
 {
 	int line = address / LINE_SIZE;
 	int word = address % LINE_SIZE;
@@ -28,7 +28,50 @@ void Dram::do_write(signed data, int address)
 	this->data->at(line).at(word) = data;
 }
 
-Response Dram::write(Accessor accessor, signed int data, int address)
+void Dram::do_write_line(
+	std::array<signed int, LINE_SIZE> data_line, int address)
+{
+	int line = address / LINE_SIZE;
+	this->data->at(line) = data_line;
+}
+
+void Dram::do_read(std::array<signed int, LINE_SIZE> &data_line, int address)
+{
+	int line = address / LINE_SIZE;
+	data_line = this->data->at(line);
+}
+
+void Dram::do_read_word(signed int &data, int address)
+{
+	int line = address / LINE_SIZE;
+	int word = address % LINE_SIZE;
+	data = this->data->at(line).at(word);
+}
+
+Response Dram::write_line(
+	Accessor accessor, std::array<signed int, LINE_SIZE> data_line, int address)
+{
+	Response r = WAIT;
+
+	if (accessor == SIDE) {
+		this->do_write_line(data_line, address);
+		r = OK;
+	} else {
+		/* Do this first--then process the first cycle immediately. */
+		if (this->requester == IDLE)
+			this->requester = accessor;
+
+		if (this->requester == accessor) {
+			if (this->wait_time == 0) {
+				this->do_write_line(data_line, address);
+				r = OK;
+			}
+		}
+	}
+	return r;
+}
+
+Response Dram::write_word(Accessor accessor, signed int data, int address)
 {
 	Response r = WAIT;
 
@@ -51,14 +94,10 @@ Response Dram::write(Accessor accessor, signed int data, int address)
 	return r;
 }
 
-void Dram::do_read(std::array<signed int, LINE_SIZE> &data_line, int address)
-{
-	int line = address / LINE_SIZE;
-	data_line = this->data->at(line);
-}
-
-Response Dram::read(
-	Accessor accessor, int address, std::array<signed int, LINE_SIZE> &data)
+Response Dram::read_line(
+	Accessor accessor,
+	int address,
+	std::array<signed int, LINE_SIZE> &data_line)
 {
 	Response r = WAIT;
 
@@ -67,7 +106,24 @@ Response Dram::read(
 
 	if (this->requester == accessor) {
 		if (this->wait_time == 0) {
-			this->do_read(data, address);
+			this->do_read(data_line, address);
+			r = OK;
+		}
+	}
+
+	return r;
+}
+
+Response Dram::read_word(Accessor accessor, int address, signed int &data)
+{
+	Response r = WAIT;
+
+	if (this->requester == IDLE)
+		this->requester = accessor;
+
+	if (this->requester == accessor) {
+		if (this->wait_time == 0) {
+			this->do_read_word(data, address);
 			r = OK;
 		}
 	}

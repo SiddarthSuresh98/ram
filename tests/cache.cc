@@ -25,7 +25,7 @@ TEST_CASE("no delay stores instantly", "[cache]")
 
 	Response r;
 
-	r = c->write(MEM, w, 0b0);
+	r = c->write_word(MEM, w, 0b0);
 	CHECK(r == OK);
 	c->resolve();
 
@@ -54,7 +54,7 @@ TEST_CASE("cache takes \"forever\"", "[cache]")
 	int i;
 	Response r;
 	for (i = 0; i < delay + 2; ++i) {
-		r = c->write(MEM, w, 0b0);
+		r = c->write_word(MEM, w, 0b0);
 		CHECK(r == WAIT); // WAIT
 
 		actual = c->view(0, 1)[0];
@@ -62,7 +62,7 @@ TEST_CASE("cache takes \"forever\"", "[cache]")
 		c->resolve();
 	}
 
-	r = c->write(MEM, w, 0b0);
+	r = c->write_word(MEM, w, 0b0);
 	CHECK(r == OK);
 
 	actual = d->view(0, 1)[0];
@@ -90,7 +90,7 @@ TEST_CASE("dram takes \"forever\"", "[cache]")
 	int i;
 	Response r;
 	for (i = 0; i < delay + 2; ++i) {
-		r = c->write(MEM, w, 0b0);
+		r = c->write_word(MEM, w, 0b0);
 		CHECK(r == BLOCKED); // BLOCKED
 
 		actual = c->view(0, 1)[0];
@@ -98,7 +98,7 @@ TEST_CASE("dram takes \"forever\"", "[cache]")
 		c->resolve();
 	}
 
-	r = c->write(MEM, w, 0b0);
+	r = c->write_word(MEM, w, 0b0);
 	CHECK(r == OK);
 
 	actual = d->view(0, 1)[0];
@@ -126,7 +126,7 @@ TEST_CASE("dram and cache take \"forever\"", "[cache]")
 	int i;
 	Response r;
 	for (i = 0; i < delay + 2; ++i) {
-		r = c->write(MEM, w, 0b0);
+		r = c->write_word(MEM, w, 0b0);
 		CHECK(r == BLOCKED); // BLOCKED
 
 		actual = c->view(0, 1)[0];
@@ -135,7 +135,7 @@ TEST_CASE("dram and cache take \"forever\"", "[cache]")
 	}
 
 	for (i = 0; i < delay; ++i) {
-		r = c->write(MEM, w, 0b0);
+		r = c->write_word(MEM, w, 0b0);
 		CHECK(r == WAIT); // WAIT
 
 		actual = c->view(0, 1)[0];
@@ -143,7 +143,7 @@ TEST_CASE("dram and cache take \"forever\"", "[cache]")
 		c->resolve();
 	}
 
-	r = c->write(MEM, w, 0b0);
+	r = c->write_word(MEM, w, 0b0);
 	CHECK(r == OK);
 	c->resolve();
 
@@ -173,10 +173,10 @@ TEST_CASE(
 	int i;
 	Response r;
 	for (i = 0; i < delay + 2; ++i) {
-		r = c->write(MEM, w, 0b0);
+		r = c->write_word(MEM, w, 0b0);
 		CHECK(r == BLOCKED); // BLOCKED
 
-		r = c->write(FETCH, w, 0b1);
+		r = c->write_word(FETCH, w, 0b1);
 		CHECK(r == WAIT); // WAIT
 
 		actual = c->view(0, 1)[0];
@@ -184,9 +184,9 @@ TEST_CASE(
 		c->resolve();
 	}
 
-	r = c->write(MEM, w, 0b0);
+	r = c->write_word(MEM, w, 0b0);
 	CHECK(r == OK);
-	r = c->write(FETCH, w, 0b1);
+	r = c->write_word(FETCH, w, 0b1);
 	CHECK(r == WAIT);
 
 	c->resolve();
@@ -199,7 +199,7 @@ TEST_CASE(
 	actual = c->view(0, 1)[0];
 	REQUIRE(expected == actual);
 
-	r = c->write(FETCH, w, 0b1);
+	r = c->write_word(FETCH, w, 0b1);
 	// this should have been loaded already!
 	CHECK(r == OK);
 
@@ -228,10 +228,10 @@ TEST_CASE(
 	int i;
 	Response r;
 	for (i = 0; i < delay + 2; ++i) {
-		r = c->write(MEM, w, 0b0);
+		r = c->write_word(MEM, w, 0b0);
 		CHECK(r == BLOCKED); // BLOCKED
 
-		r = c->write(FETCH, w, 0b100);
+		r = c->write_word(FETCH, w, 0b100);
 		CHECK(r == WAIT); // WAIT
 
 		actual = c->view(0, 1)[0];
@@ -239,9 +239,9 @@ TEST_CASE(
 		c->resolve();
 	}
 
-	r = c->write(MEM, w, 0b0);
+	r = c->write_word(MEM, w, 0b0);
 	CHECK(r == OK);
-	r = c->write(FETCH, w, 0b1);
+	r = c->write_word(FETCH, w, 0b1);
 	CHECK(r == WAIT);
 
 	c->resolve();
@@ -255,7 +255,7 @@ TEST_CASE(
 	REQUIRE(expected == actual);
 
 	for (i = 0; i < delay + 2; ++i) {
-		r = c->write(FETCH, w, 0b100);
+		r = c->write_word(FETCH, w, 0b100);
 		CHECK(r == BLOCKED); // BLOCKED
 
 		actual = c->view(0, 1)[0];
@@ -263,7 +263,7 @@ TEST_CASE(
 		c->resolve();
 	}
 
-	r = c->write(FETCH, w, 0b1);
+	r = c->write_word(FETCH, w, 0b1);
 	CHECK(r == OK);
 
 	c->resolve();
