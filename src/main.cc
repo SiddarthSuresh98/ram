@@ -53,9 +53,6 @@ static void parseArguments(int argc, char **argv, bool &python)
 			global_log->log(INFO, "Python will NOT be started!");
 			python = false;
 			break;
-		case 'v':
-			print_version_number();
-			exit(EXIT_SUCCESS);
 		default:
 			err();
 			exit(EXIT_FAILURE);

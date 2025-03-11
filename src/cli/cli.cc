@@ -82,6 +82,9 @@ void Cli::help()
 		<< std::endl
 		<< "  [s]tore <accessor> <data> <address> - Stores data into memory at "
 		   "specified address. Acessor must be one of: [f]etch, [m]em"
+		<< "  [p]eek <storage-level> <base> <lines> - side door function that "
+		   "peeks the current status of the entire memory subsystem"
+		<< std::endl
 		<< std::endl
 		<< "  [c]ycle - manually advances the clock" << std::endl
 		<< "  [f]orce - advances the clock until one operation reports "
@@ -91,19 +94,30 @@ void Cli::help()
 		   "configuration and "
 		   "cycles"
 		<< std::endl
-		<< "  [p]eek <storage-level> <base> <lines> - side door function that "
-		   "peeks the current status of the entire memory subsystem"
-		<< std::endl
-		<< "  [h]elp - Prints this help text" << std::endl
-		<< "  [q]uit - Quits the program" << std::endl;
+		<< "  [h]elp  - prints this help text" << std::endl
+		<< "  [q]uit  - quits the program" << std::endl;
 }
 
-void Cli::load(Accessor accessor, int address) { ; }
+void Cli::load(Accessor accessor, int address)
+{
+	const auto default_flags = std::cout.flags();
+	const auto default_fill = std::cout.fill();
+
+	signed int data;
+	// Response r = this->cache->read_word(accessor, address, data);
+	// std::cout << r << " to " << accessor << " reading " << address << std::endl;
+	// if (r == OK)
+	// 	std::cout << "\tGot:" << std::hex << data;
+
+	std::cout.flags(default_flags);
+	std::cout.fill(default_fill);
+}
 
 void Cli::store(Accessor accessor, int data, int address)
 {
 	Response r = this->cache->write(accessor, data, address);
-	std::cout << r << " to " << accessor << " storing " << data << '\n';
+	std::cout << r << " to " << accessor << " storing " << data << " in"
+			  << address << std::endl;
 }
 
 void Cli::clock()
@@ -115,7 +129,7 @@ void Cli::clock()
 void Cli::reset()
 {
 	this->initialize();
-	std::cout << "Done.\n";
+	std::cout << "Done." << std::endl;
 }
 
 void Cli::peek(int level)
@@ -123,7 +137,8 @@ void Cli::peek(int level)
 	Storage *curr = this->cache;
 	for (int i = 0; i < level; ++i) {
 		if (!curr) {
-			std::cerr << "Level " << level << " of storage does not exist.\n";
+			std::cerr << "Level " << level << " of storage does not exist."
+					  << std::endl;
 			return;
 		}
 		curr = curr->get_lower();
@@ -131,9 +146,9 @@ void Cli::peek(int level)
 
 	Cache *c = dynamic_cast<Cache *>(curr);
 	if (c) {
-		std::cout << *c;
+		std::cout << *c << std::endl;
 	} else {
-		std::cout << *dynamic_cast<Dram *>(curr);
+		std::cout << *dynamic_cast<Dram *>(curr) << std::endl;
 		;
 	}
 }
@@ -141,7 +156,8 @@ void Cli::peek(int level)
 void Cli::run()
 {
 	std::cout << "Memory Command Processor Started. Type 'h' for a list of "
-				 "commands.\n";
+				 "commands."
+			  << std::endl;
 	std::string input;
 
 	bool run = true;
@@ -198,7 +214,7 @@ void Cli::initialize()
 	this->cycle = 1;
 }
 
-Accessor match_accessor_or_die(std::string s)
+Accessor Cli::match_accessor_or_die(std::string s)
 {
 	if (tolower(s[0]) == 'f')
 		return FETCH;

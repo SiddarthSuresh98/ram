@@ -1,8 +1,8 @@
 #ifndef DRAM_H
 #define DRAM_H
 #include "definitions.h"
+#include "storage.h"
 #include <ostream>
-#include <storage.h>
 
 class Dram : public Storage
 {

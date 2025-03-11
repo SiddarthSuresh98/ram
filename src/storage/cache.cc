@@ -104,7 +104,7 @@ std::ostream &operator<<(std::ostream &os, const Cache &c)
 	   << " | " << std::setfill(' ') << std::setw((8 + 3) * 4 - 1) << "DATA"
 	   << " | " << std::setfill(' ')
 	   << std::setw(MEM_SPEC - LINE_SPEC - L1_CACHE_SPEC + 2) << "TAG"
-	   << " | D\n";
+	   << " | D" << std::endl;
 	for (int i = 0; i < L1_CACHE_SIZE; ++i) {
 		os << " 0b" << std::setw(L1_CACHE_SPEC) << std::bitset<L1_CACHE_SPEC>(i)
 		   << " | ";
@@ -114,7 +114,7 @@ std::ostream &operator<<(std::ostream &os, const Cache &c)
 		}
 		os << "| 0x" << std::setfill(' ')
 		   << std::bitset<MEM_SPEC - LINE_SPEC - L1_CACHE_SPEC>(meta.at(i)[0])
-		   << " | " << (int)(meta.at(i)[0] >= 0) << '\n';
+		   << " | " << (int)(meta.at(i)[0] >= 0) << std::endl;
 	}
 
 	std::cout.flags(default_flags);

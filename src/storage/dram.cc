@@ -1,8 +1,8 @@
 #include "dram.h"
 #include "definitions.h"
 #include "response.h"
-#include <bits/stdc++.h>
 #include <algorithm>
+#include <bits/stdc++.h>
 #include <bitset>
 #include <iostream>
 #include <iterator>
@@ -80,18 +80,18 @@ std::ostream &operator<<(std::ostream &os, const Dram &d)
 	const auto default_flags = std::cout.flags();
 	const auto default_fill = std::cout.fill();
 
-	std::vector<std::array<signed int, LINE_SIZE>> data =
-		d.view(0, MEM_SIZE);
+	std::vector<std::array<signed int, LINE_SIZE>> data = d.view(0, MEM_SIZE);
 
 	os << " " << std::setfill(' ') << std::setw(MEM_SPEC + 2) << "INDEX"
-	   << " | " << std::setfill(' ') << std::setw((8 + 3) * 4 - 1) << "DATA" << '\n';
+	   << " | " << std::setfill(' ') << std::setw((8 + 3) * 4 - 1) << "DATA"
+	   << std::endl;
 	for (int i = 0; i < MEM_SIZE; ++i) {
 		os << " 0b" << std::setw(MEM_SPEC) << std::bitset<MEM_SPEC>(i) << " | ";
 		for (int j = 0; j < LINE_SIZE; ++j) {
 			os << "0x" << std::setfill('0') << std::setw(8) << std::hex
 			   << data.at(i).at(j) << ' ';
 		}
-		os << '\n';
+		os << std::endl;
 	}
 
 	std::cout.flags(default_flags);
