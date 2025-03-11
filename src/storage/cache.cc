@@ -34,7 +34,7 @@ Response Cache::write(Accessor accessor, signed int data, int address)
 		this->requester = accessor;
 
 	if (this->requester == accessor) {
-		fetch_resource(address);
+		fetch_resource(WRITE,address);
 		if (this->is_waiting)
 			r = BLOCKED;
 		else if (this->wait_time == 0) {
@@ -58,7 +58,7 @@ Response Cache::write_line(Accessor accessor, std::array<signed int, LINE_SIZE> 
 		this->requester = accessor;
 
 	if (this->requester == accessor) {
-		fetch_resource(address);
+		fetch_resource(WRITE,address);
 		if (this->is_waiting)
 			r = BLOCKED;
 		else if (this->wait_time == 0) {
@@ -80,7 +80,7 @@ Response Cache::read(Accessor accessor, int address, std::array<signed int, LINE
 	if (this->requester == IDLE)
 		this->requester = accessor;
 	if (this->requester == accessor) {
-		fetch_resource(address);
+		fetch_resource(READ,address);
 		if (this->is_waiting)
 			r = BLOCKED;
 		else if (this->wait_time == 0) {
@@ -99,7 +99,7 @@ Response Cache::read_word(Accessor accessor, int address, signed int &data)
 	if (this->requester == IDLE)
 		this->requester = accessor;
 	if (this->requester == accessor) {
-		fetch_resource(address);
+		fetch_resource(READ,address);
 		if (this->is_waiting)
 			r = BLOCKED;
 		else if (this->wait_time == 0) {
@@ -112,7 +112,7 @@ Response Cache::read_word(Accessor accessor, int address, signed int &data)
 	return r;
 }
 
-void Cache::fetch_resource(int expected)
+void Cache::fetch_resource(Operation op, int expected)
 {
 	Response r = OK;
 	int tag, index, offset;
@@ -131,6 +131,9 @@ void Cache::fetch_resource(int expected)
 			r = this->lower->write_line(L1CACHE, actual, ((index << LINE_SPEC) + (meta->at(0) << (L1_CACHE_SPEC + LINE_SPEC))));
 			if (r == OK) {
 				meta->at(1) = -1;
+				if(op == READ){
+					r = WAIT; //if operation is read, need to wait until cache is loaded with right value from memory address, if operation is write, then this is not necessary
+				}
 			}
 		} else {
 			r = this->lower->read(L1CACHE, expected, actual);
