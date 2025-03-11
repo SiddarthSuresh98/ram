@@ -28,3 +28,10 @@ const std::string string_format(const char *const zcFormat, ...)
 	va_end(vaArgs);
 	return std::string(zc.data(), iLen);
 }
+
+int wrap_address(int address) {
+	if (address < 0){
+		return ((address % MEM_SIZE) + MEM_SIZE) % MEM_SIZE;
+	}
+	return address % MEM_SIZE;
+}
