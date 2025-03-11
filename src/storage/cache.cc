@@ -138,6 +138,7 @@ void Cache::fetch_resource(int expected)
 				 (meta->at(0) << (L1_CACHE_LINE_SPEC + LINE_SPEC))));
 			if (r == OK) {
 				meta->at(1) = -1;
+				r = WAIT;
 			}
 		} else {
 			r = this->lower->read_line(L1CACHE, expected, actual);
@@ -165,11 +166,12 @@ std::ostream &operator<<(std::ostream &os, const Cache &c)
 	std::vector<std::array<signed int, LINE_SIZE>> data =
 		c.view(0, L1_CACHE_LINES);
 	std::array<std::array<int, 2>, L1_CACHE_LINES> meta = c.get_meta();
+	std::cout << "FOO " << meta.at(31)[0];
 
 	os << " " << std::setfill(' ') << std::setw(L1_CACHE_LINE_SPEC + 2) << "INDEX"
 	   << " | " << std::setfill(' ') << std::setw((8 + 3) * 4 - 1) << "DATA"
 	   << " | " << std::setfill(' ')
-	   << std::setw(MEM_LINE_SPEC - LINE_SPEC - L1_CACHE_LINE_SPEC + 2) << "TAG"
+	   << std::setw(MEM_LINE_SPEC - L1_CACHE_LINE_SPEC + 2) << "TAG"
 	   << " | D" << std::endl;
 	for (int i = 0; i < L1_CACHE_LINES; ++i) {
 		os << " 0b" << std::setw(L1_CACHE_LINE_SPEC) << std::bitset<L1_CACHE_LINE_SPEC>(i)
@@ -178,12 +180,12 @@ std::ostream &operator<<(std::ostream &os, const Cache &c)
 			os << "0x" << std::setfill('0') << std::setw(8) << std::hex
 			   << data.at(i).at(j) << " ";
 		}
-		os << "| 0x" << std::setfill(' ');
+		os << "| 0b" << std::setfill(' ');
 
 		if (meta.at(i)[0] < 0)
-			os << "?";
+			os << std::setfill('?') << std::setw(MEM_LINE_SPEC - L1_CACHE_LINE_SPEC) << "";
 		else
-		  os << std::bitset<MEM_LINE_SPEC - LINE_SPEC - L1_CACHE_LINE_SPEC>(meta.at(i)[0]);
+		  os << std::bitset<MEM_LINE_SPEC - L1_CACHE_LINE_SPEC>(meta.at(i)[0]);
 
 		os << " | " << (int)(meta.at(i)[0] >= 0) << std::endl;
 	}
