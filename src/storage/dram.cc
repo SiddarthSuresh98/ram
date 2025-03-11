@@ -6,6 +6,7 @@
 #include <bitset>
 #include <iostream>
 #include <iterator>
+#include <utils.h>
 
 Dram::Dram(int lines, int delay)
 {
@@ -22,6 +23,7 @@ Dram::~Dram() { delete this->data; }
 
 void Dram::do_write(signed int data, int address)
 {
+	address = wrap_address(address);
 	int line = address / LINE_SIZE;
 	int word = address % LINE_SIZE;
 
@@ -31,18 +33,21 @@ void Dram::do_write(signed int data, int address)
 void Dram::do_write_line(
 	std::array<signed int, LINE_SIZE> data_line, int address)
 {
+	address = wrap_address(address);
 	int line = address / LINE_SIZE;
 	this->data->at(line) = data_line;
 }
 
 void Dram::do_read(std::array<signed int, LINE_SIZE> &data_line, int address)
 {
+	address = wrap_address(address);
 	int line = address / LINE_SIZE;
 	data_line = this->data->at(line);
 }
 
 void Dram::do_read_word(signed int &data, int address)
 {
+	address = wrap_address(address);
 	int line = address / LINE_SIZE;
 	int word = address % LINE_SIZE;
 	data = this->data->at(line).at(word);

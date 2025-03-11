@@ -100,6 +100,7 @@ void Cli::help()
 
 void Cli::load(Accessor accessor, int address)
 {
+	address = wrap_address(address);
 	const auto default_flags = std::cout.flags();
 	const auto default_fill = std::cout.fill();
 
@@ -107,7 +108,7 @@ void Cli::load(Accessor accessor, int address)
 	Response r = this->cache->read_word(accessor, address, data);
 	std::cout << r << " to " << accessor << " reading " << address << std::endl;
 	if (r == OK)
-		std::cout << "  Got:" << std::hex << data << std::endl;
+		std::cout << "  Got: " << std::hex << data << std::endl;
 
 	std::cout.flags(default_flags);
 	std::cout.fill(default_fill);
@@ -115,6 +116,7 @@ void Cli::load(Accessor accessor, int address)
 
 void Cli::store(Accessor accessor, int data, int address)
 {
+	address = wrap_address(address);
 	Response r = this->cache->write_word(accessor, data, address);
 	std::cout << r << " to " << accessor << " storing " << data << " in "
 			  << address << std::endl;
