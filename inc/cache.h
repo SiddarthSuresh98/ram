@@ -21,11 +21,12 @@ class Cache : public Storage
 	~Cache();
 
 	Response write(Accessor accessor, signed int data, int address) override;
+	Response write_line(Accessor accessor, std::array<signed int, LINE_SIZE> data_line, int address) override;
 	Response read(
 		Accessor accessor,
 		int address,
 		std::array<signed int, LINE_SIZE> &data) override;
-	Response read_word(Accessor accessor, int address, signed int &data);
+	Response read_word(Accessor accessor, int address, signed int &data) override;
 
 	/**
 	 * Getter for the meta attribute.

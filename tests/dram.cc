@@ -196,7 +196,7 @@ TEST_CASE("Construct singleton dram, write a line to an address", "[dram]")
 	signed int w = 0x11223311;
 	expected = {w, w+1, w+2, w+3};
 	int addr = 0x00000000;
-	d->write_line(expected, addr);
+	d->write_line(MEM, expected, addr);
 
 	Response r = d->read(MEM, 0x00000000, actual);
 	CHECK(r == OK);

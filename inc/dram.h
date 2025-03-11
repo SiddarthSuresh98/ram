@@ -22,18 +22,29 @@ class Dram : public Storage
 		Accessor accessor,
 		int address,
 		std::array<signed int, LINE_SIZE> &data) override;
+	Response write_line(Accessor accessor, std::array<signed int, LINE_SIZE> data_line, int address) override;
 
-	void write_line(std::array<signed int, LINE_SIZE> data_line, int address);
+	Response read(Accessor accessor, int address, std::array<signed int, LINE_SIZE>& data) override;
+	Response read_word(Accessor accessor, int address, signed int &data) override;
 
 	private:
 	/**
-	 * Helper for `write`.
+	 * Helper for `write` a word
 	 */
 	void do_write(signed int, int);
 	/**
-	 * Helper for `read`.
+	 * Helper for writing a line.
+	 */
+	void do_write_line(std::array<signed int, LINE_SIZE> data_line, int address);
+	/**
+	 * Helper for `read` a line
 	 */
 	void do_read(std::array<signed int, LINE_SIZE> &data_line, int address);
+	void do_read(std::array<signed int, LINE_SIZE>& data_line, int address);
+	/**
+	 * Helper for reading a word.
+	 */
+	void do_read_word(signed int &data, int address);
 };
 
 std::ostream &operator<<(std::ostream &os, const Dram &d);
