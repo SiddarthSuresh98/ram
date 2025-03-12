@@ -6,6 +6,7 @@
 #include <bitset>
 #include <iostream>
 #include <iterator>
+#include <utils.h>
 
 Dram::Dram(int lines, int delay)
 {
@@ -22,6 +23,7 @@ Dram::~Dram() { delete this->data; }
 
 void Dram::do_write(signed int data, int address)
 {
+	address = wrap_address(address);
 	int line = address / LINE_SIZE;
 	int word = address % LINE_SIZE;
 
@@ -31,18 +33,21 @@ void Dram::do_write(signed int data, int address)
 void Dram::do_write_line(
 	std::array<signed int, LINE_SIZE> data_line, int address)
 {
+	address = wrap_address(address);
 	int line = address / LINE_SIZE;
 	this->data->at(line) = data_line;
 }
 
 void Dram::do_read(std::array<signed int, LINE_SIZE> &data_line, int address)
 {
+	address = wrap_address(address);
 	int line = address / LINE_SIZE;
 	data_line = this->data->at(line);
 }
 
 void Dram::do_read_word(signed int &data, int address)
 {
+	address = wrap_address(address);
 	int line = address / LINE_SIZE;
 	int word = address % LINE_SIZE;
 	data = this->data->at(line).at(word);
@@ -136,13 +141,15 @@ std::ostream &operator<<(std::ostream &os, const Dram &d)
 	const auto default_flags = std::cout.flags();
 	const auto default_fill = std::cout.fill();
 
-	std::vector<std::array<signed int, LINE_SIZE>> data = d.view(0, MEM_SIZE);
+	std::vector<std::array<signed int, LINE_SIZE>> data = d.view(0, MEM_LINES);
 
-	os << " " << std::setfill(' ') << std::setw(MEM_SPEC + 2) << "INDEX"
+	os << " " << std::setfill(' ') << std::setw(MEM_LINE_SPEC + 2 + LINE_SPEC)
+	   << "ADDRESS"
 	   << " | " << std::setfill(' ') << std::setw((8 + 3) * 4 - 1) << "DATA"
 	   << std::endl;
-	for (int i = 0; i < MEM_SIZE; ++i) {
-		os << " 0b" << std::setw(MEM_SPEC) << std::bitset<MEM_SPEC>(i) << " | ";
+	for (int i = 0; i < MEM_LINES; ++i) {
+		os << " 0b" << std::setw(MEM_LINE_SPEC + LINE_SPEC) << left
+		   << std::bitset<MEM_LINE_SPEC>(i) << " | ";
 		for (int j = 0; j < LINE_SIZE; ++j) {
 			os << "0x" << std::setfill('0') << std::setw(8) << std::hex
 			   << data.at(i).at(j) << ' ';

@@ -7,9 +7,8 @@
 void get_bit_fields(int address, int *tag, int *index, int *offset)
 {
 	*tag = GET_MID_BITS(
-		address, LINE_SPEC + L1_CACHE_SPEC,
-		MEM_SPEC + LINE_SPEC + L1_CACHE_SPEC);
-	*index = GET_MID_BITS(address, LINE_SPEC, L1_CACHE_SPEC + LINE_SPEC);
+		address, L1_CACHE_LINE_SPEC + LINE_SPEC, MEM_WORD_SPEC);
+	*index = GET_MID_BITS(address, LINE_SPEC, L1_CACHE_LINE_SPEC + LINE_SPEC);
 	*offset = GET_LS_BITS(address, LINE_SPEC);
 }
 
@@ -31,7 +30,7 @@ const std::string string_format(const char *const zcFormat, ...)
 
 int wrap_address(int address) {
 	if (address < 0){
-		return ((address % MEM_SIZE) + MEM_SIZE) % MEM_SIZE;
+		return ((address % MEM_WORDS) + MEM_WORDS) % MEM_WORDS;
 	}
-	return address % MEM_SIZE;
+	return address % MEM_WORDS;
 }

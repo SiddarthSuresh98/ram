@@ -13,33 +13,33 @@
 #define LINE_SIZE static_cast<int>(pow(2, 2))
 
 /**
+ * The number of bits to specify a memory word
  * The number of bits to specify a memory line
- * calculated as: (/ (expt 2 15) 4)
+ * The total number of lines in memory
  */
-#define MEM_SPEC 8
-/**
- * The total number of words in memory
- */
-#define MEM_SIZE static_cast<int>(pow(2, MEM_SPEC))
+#define MEM_WORD_SPEC 10
+#define MEM_LINE_SPEC static_cast<unsigned int>(MEM_WORD_SPEC - LINE_SPEC)
+#define MEM_WORDS static_cast<int>(pow(2, MEM_WORD_SPEC))
+#define MEM_LINES static_cast<int>(pow(2, MEM_LINE_SPEC))
 
 /**
+ * The number of bits to specify a l1 cache word
  * The number of bits to specify a l1 cache line
+ * The total number of lines in l1 cache
  */
-#define L1_CACHE_SPEC 5
-/**
- * The total number of words in l1 cache
- */
-#define L1_CACHE_SIZE static_cast<int>(pow(2, L1_CACHE_SPEC))
+#define L1_CACHE_WORD_SPEC 7
+#define L1_CACHE_LINE_SPEC static_cast<unsigned int>(L1_CACHE_WORD_SPEC - LINE_SPEC)
+#define L1_CACHE_LINES static_cast<int>(pow(2, L1_CACHE_LINE_SPEC))
 
 /**
  * The total number of cycles a memory access takes.
  */
-#define MEM_DELAY 4
+#define MEM_DELAY 3
 
 /**
  * The total number of cycles a level one cache access takes
  */
-#define L1_CACHE_DELAY 1
+#define L1_CACHE_DELAY 0
 
 /**
  * Return the N least-significant bits from integer K using a bit mask
