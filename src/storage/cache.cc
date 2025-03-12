@@ -119,6 +119,7 @@ Response Cache::read_word(Accessor accessor, int address, signed int &data)
 void Cache::fetch_resource(int expected)
 {
 	Response r = OK;
+	Response q;
 	int tag, index, offset;
 	std::array<signed int, LINE_SIZE> *actual;
 	std::array<int, 2> *meta;
@@ -128,21 +129,21 @@ void Cache::fetch_resource(int expected)
 	actual = &this->data->at(index);
 
 	if (meta->at(0) != tag) {
+		r = WAIT;
 		// address not in cache
 		if (meta->at(1) >= 0) {
 			// occupant is dirty
 			// writing line to DRam in case of dirty cache eviction
-			r = this->lower->write_line(
+			q = this->lower->write_line(
 				L1CACHE, *actual,
 				((index << LINE_SPEC) +
 				 (meta->at(0) << (L1_CACHE_LINE_SPEC + LINE_SPEC))));
-			if (r == OK) {
+			if (q == OK) {
 				meta->at(1) = -1;
-				r = WAIT;
 			}
 		} else {
-			r = this->lower->read_line(L1CACHE, expected, *actual);
-			if (r == OK) {
+			q = this->lower->read_line(L1CACHE, expected, *actual);
+			if (q == OK) {
 				meta->at(0) = tag;
 			}
 		}
