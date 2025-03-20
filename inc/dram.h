@@ -14,7 +14,7 @@ class Dram : public Storage
 	 * @param The number of clock cycles each access takes.
 	 * @return A new memory object.
 	 */
-	Dram(int lines, int delay);
+	Dram(int delay);
 	~Dram();
 
 	Response

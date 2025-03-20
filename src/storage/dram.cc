@@ -8,10 +8,10 @@
 #include <iterator>
 #include <utils.h>
 
-Dram::Dram(int lines, int delay)
+Dram::Dram(int delay)
 {
 	this->data = new std::vector<std::array<signed int, LINE_SIZE>>;
-	this->data->resize(lines);
+	this->data->resize(MEM_LINES);
 	this->delay = delay;
 	this->is_waiting = false;
 	this->lower = nullptr;
