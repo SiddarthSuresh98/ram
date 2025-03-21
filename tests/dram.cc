@@ -13,7 +13,27 @@ class DramFixture
 		this->expected = {0, 0, 0, 0};
 		this->actual = this->d->view(0, 1)[0];
 	}
+
 	~DramFixture() { delete this->d; }
+
+	/**
+	 * An operation that is done a lot.
+	 */
+	void
+	wait_for_storage(int delay, Response expected, std::function<Response()> f)
+	{
+		for (int i = 0; i < delay; ++i) {
+			Response r = f();
+			this->d->resolve();
+
+			// check response
+			CHECK(r == expected);
+			// check for early modifications
+			actual = d->view(0, 1)[0];
+			REQUIRE(this->expected == this->actual);
+		}
+	}
+
 	int delay;
 	Dram *d;
 	std::array<signed int, LINE_SIZE> expected;
@@ -24,20 +44,12 @@ TEST_CASE_METHOD(DramFixture, "store 0th element in DELAY cycles", "[dram]")
 {
 	Response r;
 	signed int w;
-	int i;
 	CHECK(expected == actual);
 
 	w = 0x11223344;
-	for (i = 0; i < this->delay; ++i) {
-		r = this->d->write_word(MEM, w, 0x0);
-		this->d->resolve();
-
-		// check response
-		CHECK(r == WAIT);
-		// check for early modifications
-		actual = d->view(0, 1)[0];
-		REQUIRE(expected == actual);
-	}
+	this->wait_for_storage(this->delay, WAIT, [this, w]() {
+		return this->d->write_word(MEM, w, 0x0);
+	});
 
 	r = this->d->write_word(MEM, w, 0x0);
 	this->d->resolve();
@@ -55,20 +67,12 @@ TEST_CASE_METHOD(
 {
 	Response r;
 	signed int w;
-	int i;
 	CHECK(expected == actual);
 
 	w = 0x11223344;
-	for (i = 0; i < this->delay; ++i) {
-		r = this->d->write_word(MEM, w, 0x0);
-		this->d->resolve();
-
-		// check response
-		CHECK(r == WAIT);
-		// check for early modifications
-		actual = d->view(0, 1)[0];
-		REQUIRE(expected == actual);
-	}
+	this->wait_for_storage(this->delay, WAIT, [this, w]() {
+		return this->d->write_word(MEM, w, 0x0);
+	});
 
 	r = d->write_word(MEM, w, 0x0);
 	REQUIRE(r == OK);
@@ -82,16 +86,9 @@ TEST_CASE_METHOD(
 	actual = d->view(0, 1)[0];
 	REQUIRE(expected == actual);
 
-	for (i = 0; i < this->delay; ++i) {
-		r = this->d->write_word(FETCH, w, 0x1);
-		this->d->resolve();
-
-		// check response
-		CHECK(r == WAIT);
-		// check for early modifications
-		actual = d->view(0, 1)[0];
-		REQUIRE(expected == actual);
-	}
+	this->wait_for_storage(this->delay, WAIT, [this, w]() {
+		return this->d->write_word(FETCH, w, 0x1);
+	});
 
 	r = d->write_word(FETCH, w, 0x1);
 	CHECK(r == OK);
@@ -135,16 +132,9 @@ TEST_CASE_METHOD(
 	actual = d->view(0, 1)[0];
 	REQUIRE(expected == actual);
 
-	for (i = 0; i < this->delay; ++i) {
-		r = this->d->write_word(FETCH, w, 0x1);
-		this->d->resolve();
-
-		// check response
-		CHECK(r == WAIT);
-		// check for early modifications
-		actual = d->view(0, 1)[0];
-		REQUIRE(expected == actual);
-	}
+	this->wait_for_storage(this->delay, WAIT, [this, w]() {
+		return this->d->write_word(FETCH, w, 0x1);
+	});
 
 	r = d->write_word(FETCH, w, 0x1);
 	CHECK(r == OK);
@@ -159,22 +149,14 @@ TEST_CASE_METHOD(DramFixture, "store line in DELAY cycles", "[dram]")
 {
 	Response r;
 	signed int w;
-	int i;
 	std::array<signed int, LINE_SIZE> buffer;
 	CHECK(expected == actual);
 
 	w = 0x11223344;
 	buffer = {w, w + 1, w + 2, w + 3};
-	for (i = 0; i < this->delay; ++i) {
-		r = this->d->write_line(MEM, buffer, 0x0);
-		this->d->resolve();
-
-		// check response
-		CHECK(r == WAIT);
-		// check for early modifications
-		actual = d->view(0, 1)[0];
-		REQUIRE(expected == actual);
-	}
+	this->wait_for_storage(this->delay, WAIT, [this, w, buffer]() {
+		return this->d->write_line(MEM, buffer, 0x0);
+	});
 
 	r = d->write_line(MEM, buffer, 0x0);
 	CHECK(r == OK);
@@ -189,22 +171,14 @@ TEST_CASE_METHOD(
 {
 	Response r;
 	signed int w;
-	int i;
 	std::array<signed int, LINE_SIZE> buffer;
 	CHECK(expected == actual);
 
 	w = 0x11223344;
 	buffer = {w, w + 1, w + 2, w + 3};
-	for (i = 0; i < this->delay; ++i) {
-		r = this->d->write_line(MEM, buffer, 0x0);
-		this->d->resolve();
-
-		// check response
-		CHECK(r == WAIT);
-		// check for early modifications
-		actual = d->view(0, 1)[0];
-		REQUIRE(expected == actual);
-	}
+	this->wait_for_storage(this->delay, WAIT, [this, w, buffer]() {
+		return this->d->write_line(MEM, buffer, 0x0);
+	});
 
 	r = this->d->write_line(MEM, buffer, 0x0);
 	REQUIRE(r == OK);
@@ -219,16 +193,9 @@ TEST_CASE_METHOD(
 	REQUIRE(expected == actual);
 
 	buffer = {w + 4, w + 5, w + 6, w + 7};
-	for (i = 0; i < this->delay; ++i) {
-		r = this->d->write_line(FETCH, buffer, 0x1);
-		this->d->resolve();
-
-		// check response
-		CHECK(r == WAIT);
-		// check for early modifications
-		actual = d->view(0, 1)[0];
-		REQUIRE(expected == actual);
-	}
+	this->wait_for_storage(this->delay, WAIT, [this, w, buffer]() {
+		return this->d->write_line(FETCH, buffer, 0x1);
+	});
 
 	r = this->d->write_line(FETCH, buffer, 0x1);
 	CHECK(r == OK);
@@ -275,16 +242,9 @@ TEST_CASE_METHOD(
 	REQUIRE(expected == actual);
 
 	buffer = {w + 4, w + 5, w + 6, w + 7};
-	for (i = 0; i < this->delay; ++i) {
-		r = this->d->write_line(FETCH, buffer, 0x1);
-		this->d->resolve();
-
-		// check response
-		CHECK(r == WAIT);
-		// check for early modifications
-		actual = d->view(0, 1)[0];
-		REQUIRE(expected == actual);
-	}
+	this->wait_for_storage(this->delay, WAIT, [this, w, buffer]() {
+		return this->d->write_line(FETCH, buffer, 0x1);
+	});
 
 	r = this->d->write_line(FETCH, buffer, 0x1);
 	CHECK(r == OK);
@@ -296,7 +256,7 @@ TEST_CASE_METHOD(
 }
 
 TEST_CASE_METHOD(
-	DramFixture, "store line in DELAY cycles, read in DELAY cycles", "[dram]")
+	DramFixture, "store line in DELAY cycles, read in DELAY cycles, no conflict", "[dram]")
 {
 	Response r;
 	signed int w;
