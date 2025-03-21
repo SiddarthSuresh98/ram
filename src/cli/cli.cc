@@ -211,7 +211,7 @@ void Cli::initialize()
 	if (this->cache != nullptr)
 		delete this->cache;
 
-	Dram *d = new Dram(MEM_LINES, MEM_DELAY);
+	Dram *d = new Dram(MEM_DELAY);
 	this->cache = new Cache(d, L1_CACHE_DELAY);
 	this->cycle = 1;
 }
