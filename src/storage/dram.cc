@@ -24,24 +24,17 @@ Dram::~Dram() { delete this->data; }
 Response Dram::write_line(
 	Accessor accessor, std::array<signed int, LINE_SIZE> data_line, int address)
 {
-	Response r = this->is_access_cleared(accessor);
-	if (r == OK) {
-		int line, word;
-		get_memory_index(address, line, word);
+	return process(accessor, address, [&](int line, int word) {
+		(void)word;
 		this->data->at(line) = data_line;
-	}
-	return r;
+	});
 }
 
 Response Dram::write_word(Accessor accessor, signed int data, int address)
 {
-	Response r = this->is_access_cleared(accessor);
-	if (r == OK) {
-		int line, word;
-		get_memory_index(address, line, word);
+	return process(accessor, address, [&](int line, int word) {
 		this->data->at(line).at(word) = data;
-	}
-	return r;
+	});
 }
 
 // TODO requires testing
@@ -50,22 +43,29 @@ Response Dram::read_line(
 	int address,
 	std::array<signed int, LINE_SIZE> &data_line)
 {
-	Response r = this->is_access_cleared(accessor);
-	if (r == OK) {
-		int line, word;
-		get_memory_index(address, line, word);
+	return process(accessor, address, [&](int line, int word) {
+		(void)word;
 		data_line = this->data->at(line);
-	}
-	return r;
+	});
 }
 
 Response Dram::read_word(Accessor accessor, int address, signed int &data)
+{
+	return process(accessor, address, [&](int line, int word) {
+		data = this->data->at(line).at(word);
+	});
+}
+
+Response Dram::process(
+	Accessor accessor,
+	int address,
+	std::function<void(int line, int word)> request_handler)
 {
 	Response r = this->is_access_cleared(accessor);
 	if (r == OK) {
 		int line, word;
 		get_memory_index(address, line, word);
-		data = this->data->at(line).at(word);
+		request_handler(line, word);
 	}
 	return r;
 }

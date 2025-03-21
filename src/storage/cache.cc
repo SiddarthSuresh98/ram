@@ -27,27 +27,20 @@ Cache::~Cache()
 
 Response Cache::write_word(Accessor accessor, signed int data, int address)
 {
-	Response r = this->is_access_cleared(accessor, address);
-	if (r == OK) {
-		int tag, index, offset;
-		get_bit_fields(address, &tag, &index, &offset);
+	return process(accessor, address, [&](int index, int offset) {
 		this->data->at(index).at(offset) = data;
 		this->meta[index].at(1) = 1;
-	}
-	return r;
+	});
 }
 
 Response Cache::write_line(
 	Accessor accessor, std::array<signed int, LINE_SIZE> data_line, int address)
 {
-	Response r = this->is_access_cleared(accessor, address);
-	if (r == OK) {
-		int tag, index, offset;
-		get_bit_fields(address, &tag, &index, &offset);
+	return process(accessor, address, [&](int index, int offset) {
+		(void)offset;
 		this->data->at(index) = data_line;
 		this->meta[index].at(1) = 1;
-	}
-	return r;
+	});
 }
 
 // TODO: tests for multi level cache
@@ -56,22 +49,29 @@ Response Cache::read_line(
 	int address,
 	std::array<signed int, LINE_SIZE> &data_line)
 {
-	Response r = this->is_access_cleared(accessor, address);
-	if (r == OK) {
-		int tag, index, offset;
-		get_bit_fields(address, &tag, &index, &offset);
+	return process(accessor, address, [&](int index, int offset) {
+		(void)offset;
 		data_line = this->data->at(index);
-	}
-	return r;
+	});
 }
 
 Response Cache::read_word(Accessor accessor, int address, signed int &data)
+{
+	return process(accessor, address, [&](int index, int offset) {
+		data = this->data->at(index).at(offset);
+	});
+}
+
+Response Cache::process(
+	Accessor accessor,
+	int address,
+	std::function<void(int index, int offset)> request_handler)
 {
 	Response r = this->is_access_cleared(accessor, address);
 	if (r == OK) {
 		int tag, index, offset;
 		get_bit_fields(address, &tag, &index, &offset);
-		data = this->data->at(index).at(offset);
+		request_handler(index, offset);
 	}
 	return r;
 }
