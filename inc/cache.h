@@ -42,6 +42,15 @@ class Cache : public Storage
 
   private:
 	/**
+	 * Returns OK if `accessor` is allowed to complete its request this cycle.
+	 * Handles cache misses, wait times, and setting the current accessor this
+	 * storage is serving.
+	 * @param the accessor asking for a resource
+	 * @return whether or not the access can be carried out this function call.
+	 */
+	Response is_access_cleared(Accessor accessor, int address);
+	/**
+	 * Helper for access_cleared.
 	 * Fetches `address` from a lower level of storage if it is not already
 	 * present. If it is not, temporarily sets the is_blocked attribute of this
 	 * cache level to true, and the victim line is chosen/written back.

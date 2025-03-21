@@ -32,22 +32,13 @@ class Dram : public Storage
 
   private:
 	/**
-	 * Helper for `write` a word
+	 * Returns OK if `accessor` is allowed to complete its request this cycle.
+	 * Handles wait times, side door, and setting the current accessor this
+	 * storage is serving.
+	 * @param the accessor asking for a resource
+	 * @return whether or not the access can be carried out this function call.
 	 */
-	void do_write(signed int, int);
-	/**
-	 * Helper for writing a line.
-	 */
-	void
-	do_write_line(std::array<signed int, LINE_SIZE> data_line, int address);
-	/**
-	 * Helper for `read` a line
-	 */
-	void do_read(std::array<signed int, LINE_SIZE> &data_line, int address);
-	/**
-	 * Helper for reading a word.
-	 */
-	void do_read_word(signed int &data, int address);
+	Response is_access_cleared(Accessor accessor);
 };
 
 std::ostream &operator<<(std::ostream &os, const Dram &d);

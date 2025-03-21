@@ -27,50 +27,26 @@ Cache::~Cache()
 
 Response Cache::write_word(Accessor accessor, signed int data, int address)
 {
-	Response r = WAIT;
-
-	/* Do this first--then process the first cycle immediately. */
-	if (this->requester == IDLE)
-		this->requester = accessor;
-
-	if (this->requester == accessor) {
-		handle_miss(address);
-		if (this->is_waiting)
-			r = BLOCKED;
-		else if (this->wait_time == 0) {
-			int tag, index, offset;
-			get_bit_fields(address, &tag, &index, &offset);
-			this->data->at(index).at(offset) = data;
-			this->meta[index].at(1) = 1;
-			r = OK;
-		}
+	Response r = this->is_access_cleared(accessor, address);
+	if (r == OK) {
+		int tag, index, offset;
+		get_bit_fields(address, &tag, &index, &offset);
+		this->data->at(index).at(offset) = data;
+		this->meta[index].at(1) = 1;
 	}
-
 	return r;
 }
 
 Response Cache::write_line(
 	Accessor accessor, std::array<signed int, LINE_SIZE> data_line, int address)
 {
-	Response r = WAIT;
-
-	/* Do this first--then process the first cycle immediately. */
-	if (this->requester == IDLE)
-		this->requester = accessor;
-
-	if (this->requester == accessor) {
-		handle_miss(address);
-		if (this->is_waiting)
-			r = BLOCKED;
-		else if (this->wait_time == 0) {
-			int tag, index, offset;
-			get_bit_fields(address, &tag, &index, &offset);
-			this->data->at(index) = data_line;
-			this->meta[index].at(1) = 1;
-			r = OK;
-		}
+	Response r = this->is_access_cleared(accessor, address);
+	if (r == OK) {
+		int tag, index, offset;
+		get_bit_fields(address, &tag, &index, &offset);
+		this->data->at(index) = data_line;
+		this->meta[index].at(1) = 1;
 	}
-
 	return r;
 }
 
@@ -80,26 +56,31 @@ Response Cache::read_line(
 	int address,
 	std::array<signed int, LINE_SIZE> &data_line)
 {
-	Response r = WAIT;
-	if (this->requester == IDLE)
-		this->requester = accessor;
-	if (this->requester == accessor) {
-		handle_miss(address);
-		if (this->is_waiting)
-			r = BLOCKED;
-		else if (this->wait_time == 0) {
-			int tag, index, offset;
-			get_bit_fields(address, &tag, &index, &offset);
-			data_line = this->data->at(index);
-			r = OK;
-		}
+	Response r = this->is_access_cleared(accessor, address);
+	if (r == OK) {
+		int tag, index, offset;
+		get_bit_fields(address, &tag, &index, &offset);
+		data_line = this->data->at(index);
 	}
 	return r;
 }
 
 Response Cache::read_word(Accessor accessor, int address, signed int &data)
 {
-	Response r = WAIT;
+	Response r = this->is_access_cleared(accessor, address);
+	if (r == OK) {
+		int tag, index, offset;
+		get_bit_fields(address, &tag, &index, &offset);
+		data = this->data->at(index).at(offset);
+	}
+	return r;
+}
+
+Response Cache::is_access_cleared(Accessor accessor, int address)
+{
+	Response r;
+	r = WAIT;
+	/* Do this first--then process the first cycle immediately. */
 	if (this->requester == IDLE)
 		this->requester = accessor;
 	if (this->requester == accessor) {
@@ -107,9 +88,6 @@ Response Cache::read_word(Accessor accessor, int address, signed int &data)
 		if (this->is_waiting)
 			r = BLOCKED;
 		else if (this->wait_time == 0) {
-			int tag, index, offset;
-			get_bit_fields(address, &tag, &index, &offset);
-			data = this->data->at(index).at(offset);
 			r = OK;
 		}
 	}
