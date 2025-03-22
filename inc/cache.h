@@ -42,6 +42,27 @@ class Cache : public Storage
 
   private:
 	/**
+	 * Helper for all access methods.
+	 * Calls `request_handler` when `accessor` is allowed to complete its
+	 * request cycle.
+	 * @param the source making the request
+	 * @param the address to write to
+	 * @param the function to call when an access should be completed
+	 */
+	Response process(
+		Accessor accessor,
+		int address,
+		std::function<void(int index, int offset)> request_handler);
+	/**
+	 * Returns OK if `accessor` is allowed to complete its request this cycle.
+	 * Handles cache misses, wait times, and setting the current accessor this
+	 * storage is serving.
+	 * @param the accessor asking for a resource
+	 * @return whether or not the access can be carried out this function call.
+	 */
+	Response is_access_cleared(Accessor accessor, int address);
+	/**
+	 * Helper for access_cleared.
 	 * Fetches `address` from a lower level of storage if it is not already
 	 * present. If it is not, temporarily sets the is_blocked attribute of this
 	 * cache level to true, and the victim line is chosen/written back.

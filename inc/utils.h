@@ -20,6 +20,20 @@ void get_bit_fields(int address, int *tag, int *index, int *offset);
  */
 const std::string string_format(const char *const zcFormat, ...);
 
+/**
+ * Given `address`, returns an address that is within the current memory size
+ * using a clean wrap.
+ * @param an address
+ * @return an address guaranteed to be within range.
+ */
 int wrap_address(int address);
+
+/**
+ * Given `address`, returns the line and word it is in.
+ * @param an address
+ * @param the line (row) `address` is in
+ * @param the word (column) `address` corresponds to
+ */
+void get_memory_index(int address, int &line, int &word);
 
 #endif /* UTILS_H_INCLUDED */

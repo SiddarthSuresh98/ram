@@ -21,118 +21,69 @@ Dram::Dram(int delay)
 
 Dram::~Dram() { delete this->data; }
 
-void Dram::do_write(signed int data, int address)
-{
-	address = wrap_address(address);
-	int line = address / LINE_SIZE;
-	int word = address % LINE_SIZE;
-
-	this->data->at(line).at(word) = data;
-}
-
-void Dram::do_write_line(
-	std::array<signed int, LINE_SIZE> data_line, int address)
-{
-	address = wrap_address(address);
-	int line = address / LINE_SIZE;
-	this->data->at(line) = data_line;
-}
-
-void Dram::do_read(std::array<signed int, LINE_SIZE> &data_line, int address)
-{
-	address = wrap_address(address);
-	int line = address / LINE_SIZE;
-	data_line = this->data->at(line);
-}
-
-void Dram::do_read_word(signed int &data, int address)
-{
-	address = wrap_address(address);
-	int line = address / LINE_SIZE;
-	int word = address % LINE_SIZE;
-	data = this->data->at(line).at(word);
-}
-
 Response Dram::write_line(
 	Accessor accessor, std::array<signed int, LINE_SIZE> data_line, int address)
 {
-	Response r = WAIT;
-
-	if (accessor == SIDE) {
-		this->do_write_line(data_line, address);
-		r = OK;
-	} else {
-		/* Do this first--then process the first cycle immediately. */
-		if (this->requester == IDLE)
-			this->requester = accessor;
-
-		if (this->requester == accessor) {
-			if (this->wait_time == 0) {
-				this->do_write_line(data_line, address);
-				r = OK;
-			}
-		}
-	}
-	return r;
+	return process(accessor, address, [&](int line, int word) {
+		(void)word;
+		this->data->at(line) = data_line;
+	});
 }
 
 Response Dram::write_word(Accessor accessor, signed int data, int address)
 {
-	Response r = WAIT;
-
-	if (accessor == SIDE) {
-		this->do_write(data, address);
-		r = OK;
-	} else {
-		/* Do this first--then process the first cycle immediately. */
-		if (this->requester == IDLE)
-			this->requester = accessor;
-
-		if (this->requester == accessor) {
-			if (this->wait_time == 0) {
-				this->do_write(data, address);
-				r = OK;
-			}
-		}
-	}
-
-	return r;
+	return process(accessor, address, [&](int line, int word) {
+		this->data->at(line).at(word) = data;
+	});
 }
 
+// TODO requires testing
 Response Dram::read_line(
 	Accessor accessor,
 	int address,
 	std::array<signed int, LINE_SIZE> &data_line)
 {
-	Response r = WAIT;
-
-	if (this->requester == IDLE)
-		this->requester = accessor;
-
-	if (this->requester == accessor) {
-		if (this->wait_time == 0) {
-			this->do_read(data_line, address);
-			r = OK;
-		}
-	}
-
-	return r;
+	return process(accessor, address, [&](int line, int word) {
+		(void)word;
+		data_line = this->data->at(line);
+	});
 }
 
 Response Dram::read_word(Accessor accessor, int address, signed int &data)
 {
-	Response r = WAIT;
+	return process(accessor, address, [&](int line, int word) {
+		data = this->data->at(line).at(word);
+	});
+}
 
-	if (this->requester == IDLE)
-		this->requester = accessor;
-
-	if (this->requester == accessor) {
-		if (this->wait_time == 0) {
-			this->do_read_word(data, address);
-			r = OK;
-		}
+Response Dram::process(
+	Accessor accessor,
+	int address,
+	std::function<void(int line, int word)> request_handler)
+{
+	Response r = this->is_access_cleared(accessor);
+	if (r == OK) {
+		int line, word;
+		get_memory_index(address, line, word);
+		request_handler(line, word);
 	}
+	return r;
+}
 
+Response Dram::is_access_cleared(Accessor accessor)
+{
+	Response r;
+	r = WAIT;
+	/* Do this first--then process the first cycle immediately. */
+	if (accessor == SIDE)
+		r = OK;
+	else {
+		if (this->requester == IDLE)
+			this->requester = accessor;
+		if (this->requester == accessor)
+			if (this->wait_time == 0)
+				r = OK;
+	}
 	return r;
 }
 

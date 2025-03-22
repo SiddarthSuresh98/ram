@@ -34,3 +34,9 @@ int wrap_address(int address) {
 	}
 	return address % MEM_WORDS;
 }
+
+void get_memory_index(int address, int &line, int &word)
+{
+	line = wrap_address(address) / LINE_SIZE;
+	word = address % LINE_SIZE;
+}
