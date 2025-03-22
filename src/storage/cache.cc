@@ -34,7 +34,7 @@ Response Cache::write_word(Accessor accessor, signed int data, int address)
 		this->requester = accessor;
 
 	if (this->requester == accessor) {
-		fetch_resource(address);
+		handle_miss(address);
 		if (this->is_waiting)
 			r = BLOCKED;
 		else if (this->wait_time == 0) {
@@ -59,7 +59,7 @@ Response Cache::write_line(
 		this->requester = accessor;
 
 	if (this->requester == accessor) {
-		fetch_resource(address);
+		handle_miss(address);
 		if (this->is_waiting)
 			r = BLOCKED;
 		else if (this->wait_time == 0) {
@@ -84,7 +84,7 @@ Response Cache::read_line(
 	if (this->requester == IDLE)
 		this->requester = accessor;
 	if (this->requester == accessor) {
-		fetch_resource(address);
+		handle_miss(address);
 		if (this->is_waiting)
 			r = BLOCKED;
 		else if (this->wait_time == 0) {
@@ -103,7 +103,7 @@ Response Cache::read_word(Accessor accessor, int address, signed int &data)
 	if (this->requester == IDLE)
 		this->requester = accessor;
 	if (this->requester == accessor) {
-		fetch_resource(address);
+		handle_miss(address);
 		if (this->is_waiting)
 			r = BLOCKED;
 		else if (this->wait_time == 0) {
@@ -116,15 +116,15 @@ Response Cache::read_word(Accessor accessor, int address, signed int &data)
 	return r;
 }
 
-void Cache::fetch_resource(int expected)
+void Cache::handle_miss(int expected)
 {
-	Response r = OK;
-	Response q;
+	Response r, q;
 	int tag, index, offset;
 	std::array<signed int, LINE_SIZE> *actual;
 	std::array<int, 2> *meta;
 
 	get_bit_fields(expected, &tag, &index, &offset);
+	r = OK;
 	meta = &this->meta.at(index);
 	actual = &this->data->at(index);
 

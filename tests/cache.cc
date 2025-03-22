@@ -3,247 +3,119 @@
 #include "dram.h"
 #include <catch2/catch_test_macros.hpp>
 
-TEST_CASE("Constructor singleton cache", "[cache]")
+class CacheFixture
 {
-	Cache *c = new Cache(nullptr, 0);
-	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
-	std::array<signed int, LINE_SIZE> actual = c->view(0, 1)[0];
-	REQUIRE(expected == actual);
-	delete c;
-}
+  public:
+	CacheFixture()
+	{
+		this->m_delay = 4;
+		this->c_delay = 2;
+		this->d = new Dram(this->m_delay);
+		this->c = new Cache(this->d, this->c_delay);
+		this->expected = {0, 0, 0, 0};
+		this->actual = this->c->view(0, 1)[0];
+	}
 
-TEST_CASE("no delay stores instantly", "[cache]")
+	~CacheFixture() { delete this->c; }
+
+	/**
+	 * An operation that is done a lot.
+	 */
+	void
+	wait_for_storage(int delay, Response expected, std::function<Response()> f)
+	{
+		for (int i = 0; i < delay; ++i) {
+			Response r = f();
+			this->c->resolve();
+
+			// check response
+			CHECK(r == expected);
+			// check for early modifications
+			actual = c->view(0, 1)[0];
+			REQUIRE(this->expected == this->actual);
+		}
+	}
+
+	int m_delay;
+	int c_delay;
+	Cache *c;
+	Dram *d;
+	std::array<signed int, LINE_SIZE> expected;
+	std::array<signed int, LINE_SIZE> actual;
+};
+
+TEST_CASE_METHOD(CacheFixture, "store 0th element in DELAY cycles", "[dram]")
 {
-	int delay = 0;
-	Dram *d = new Dram(delay);
-	Cache *c = new Cache(d, delay);
-	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
-	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
+	Response r;
+	signed int w;
 	CHECK(expected == actual);
 
-	signed int w = 0x11223344;
+	w = 0x11223344;
+	// delay + 1 due to internal logic, when mem
+	// finishes handle_miss still returns 'blocked'
+	this->wait_for_storage(this->m_delay + 1, BLOCKED, [this, w]() {
+		return this->c->write_word(MEM, w, 0b0);
+	});
 
-	Response r;
+	this->wait_for_storage(this->c_delay, WAIT, [this, w]() {
+		return this->c->write_word(MEM, w, 0b0);
+	});
 
 	r = c->write_word(MEM, w, 0b0);
 	CHECK(r == OK);
-	c->resolve();
 
-	actual = d->view(0, 1)[0];
+	actual = this->d->view(0, 1)[0];
 	// we do NOT write back now!
 	REQUIRE(expected == actual);
 
 	expected.at(0) = w;
 	actual = c->view(0, 1)[0];
 	REQUIRE(expected == actual);
-
-	delete c;
 }
 
-TEST_CASE("cache takes \"forever\"", "[cache]")
-{
-	int delay = 0;
-	Dram *d = new Dram(delay);
-	Cache *c = new Cache(d, delay + 2);
-	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
-	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
-	CHECK(expected == actual);
-
-	signed int w = 0x11223344;
-
-	int i;
-	Response r;
-	for (i = 0; i < delay + 2; ++i) {
-		r = c->write_word(MEM, w, 0b0);
-		CHECK(r == WAIT); // WAIT
-
-		actual = c->view(0, 1)[0];
-		REQUIRE(expected == actual);
-		c->resolve();
-	}
-
-	r = c->write_word(MEM, w, 0b0);
-	CHECK(r == OK);
-
-	actual = d->view(0, 1)[0];
-	// we do NOT write back now!
-	REQUIRE(expected == actual);
-
-	expected.at(0) = w;
-	actual = c->view(0, 1)[0];
-	REQUIRE(expected == actual);
-
-	delete c;
-}
-
-TEST_CASE("dram takes \"forever\"", "[cache]")
-{
-	int delay = 0;
-	Dram *d = new Dram(delay + 2);
-	Cache *c = new Cache(d, delay);
-	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
-	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
-	CHECK(expected == actual);
-
-	signed int w = 0x11223344;
-
-	int i;
-	Response r;
-	for (i = 0; i < delay + 2; ++i) {
-		r = c->write_word(MEM, w, 0b0);
-		CHECK(r == BLOCKED); // BLOCKED
-
-		actual = c->view(0, 1)[0];
-		REQUIRE(expected == actual);
-		c->resolve();
-	}
-
-	r = c->write_word(MEM, w, 0b0);
-	CHECK(r == OK);
-
-	actual = d->view(0, 1)[0];
-	// we do NOT write back now!
-	REQUIRE(expected == actual);
-
-	expected.at(0) = w;
-	actual = c->view(0, 1)[0];
-	REQUIRE(expected == actual);
-
-	delete c;
-}
-
-TEST_CASE("dram and cache take \"forever\"", "[cache]")
-{
-	int delay = 2;
-	Dram *d = new Dram(delay + 2);
-	Cache *c = new Cache(d, delay);
-	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
-	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
-	CHECK(expected == actual);
-
-	signed int w = 0x11223344;
-
-	int i;
-	Response r;
-	for (i = 0; i < delay + 2; ++i) {
-		r = c->write_word(MEM, w, 0b0);
-		CHECK(r == BLOCKED); // BLOCKED
-
-		actual = c->view(0, 1)[0];
-		REQUIRE(expected == actual);
-		c->resolve();
-	}
-
-	for (i = 0; i < delay; ++i) {
-		r = c->write_word(MEM, w, 0b0);
-		CHECK(r == WAIT); // WAIT
-
-		actual = c->view(0, 1)[0];
-		REQUIRE(expected == actual);
-		c->resolve();
-	}
-
-	r = c->write_word(MEM, w, 0b0);
-	CHECK(r == OK);
-	c->resolve();
-
-	actual = d->view(0, 1)[0];
-	// we do NOT write back now!
-	REQUIRE(expected == actual);
-
-	expected.at(0) = w;
-	actual = c->view(0, 1)[0];
-	REQUIRE(expected == actual);
-
-	delete c;
-}
-
-TEST_CASE(
-	"dram takes \"forever\", two concurrent requests same index", "[cache]")
-{
-	int delay = 0;
-	Dram *d = new Dram(delay + 2);
-	Cache *c = new Cache(d, delay);
-	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
-	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
-	CHECK(expected == actual);
-
-	signed int w = 0x11223344;
-
-	int i;
-	Response r;
-	for (i = 0; i < delay + 2; ++i) {
-		r = c->write_word(MEM, w, 0b0);
-		CHECK(r == BLOCKED); // BLOCKED
-
-		r = c->write_word(FETCH, w, 0b1);
-		CHECK(r == WAIT); // WAIT
-
-		actual = c->view(0, 1)[0];
-		REQUIRE(expected == actual);
-		c->resolve();
-	}
-
-	r = c->write_word(MEM, w, 0b0);
-	CHECK(r == OK);
-	r = c->write_word(FETCH, w, 0b1);
-	CHECK(r == WAIT);
-
-	c->resolve();
-
-	actual = d->view(0, 1)[0];
-	// we do NOT write back now!
-	REQUIRE(expected == actual);
-
-	expected.at(0) = w;
-	actual = c->view(0, 1)[0];
-	REQUIRE(expected == actual);
-
-	r = c->write_word(FETCH, w, 0b1);
-	// this should have been loaded already!
-	CHECK(r == OK);
-
-	c->resolve();
-
-	expected.at(1) = w;
-	actual = c->view(0, 1)[0];
-	REQUIRE(expected == actual);
-
-	delete c;
-}
-
-TEST_CASE(
-	"dram takes \"forever\", two concurrent requests different index",
+TEST_CASE_METHOD(
+	CacheFixture,
+	"store 0th, 1st element in DELAY cycles, with conflict",
 	"[cache]")
 {
-	int delay = 0;
-	Dram *d = new Dram(delay + 2);
-	Cache *c = new Cache(d, delay);
-	std::array<signed int, LINE_SIZE> expected = {0, 0, 0, 0};
-	std::array<signed int, LINE_SIZE> actual = d->view(0, 1)[0];
+	Response r;
+	signed int w;
+	int i;
 	CHECK(expected == actual);
 
-	signed int w = 0x11223344;
-
-	int i;
-	Response r;
-	for (i = 0; i < delay + 2; ++i) {
+	w = 0x11223344;
+	// delay + 1 due to internal logic, when mem
+	// finishes handle_miss still returns 'blocked'
+	for (i = 0; i < this->m_delay + 1; ++i) {
 		r = c->write_word(MEM, w, 0b0);
-		CHECK(r == BLOCKED); // BLOCKED
+		CHECK(r == BLOCKED);
+		r = c->write_word(FETCH, w, 0b1);
+		CHECK(r == WAIT);
+		this->c->resolve();
 
-		r = c->write_word(FETCH, w, 0b100);
-		CHECK(r == WAIT); // WAIT
-
+		// check for early modifications
 		actual = c->view(0, 1)[0];
-		REQUIRE(expected == actual);
-		c->resolve();
+		REQUIRE(this->expected == this->actual);
+	}
+
+	for (i = 0; i < this->c_delay; ++i) {
+		r = c->write_word(MEM, w, 0b0);
+		CHECK(r == WAIT);
+		r = c->write_word(FETCH, w, 0b1);
+		CHECK(r == WAIT);
+		this->c->resolve();
+
+		// check for early modifications
+		actual = c->view(0, 1)[0];
+		REQUIRE(this->expected == this->actual);
 	}
 
 	r = c->write_word(MEM, w, 0b0);
 	CHECK(r == OK);
+	// clock cycle did NOT resolve yet!
+	// this fetch should not make progress
 	r = c->write_word(FETCH, w, 0b1);
 	CHECK(r == WAIT);
-
 	c->resolve();
 
 	actual = d->view(0, 1)[0];
@@ -254,29 +126,76 @@ TEST_CASE(
 	actual = c->view(0, 1)[0];
 	REQUIRE(expected == actual);
 
-	for (i = 0; i < delay + 2; ++i) {
-		r = c->write_word(FETCH, w, 0b100);
-		CHECK(r == BLOCKED); // BLOCKED
-
-		actual = c->view(0, 1)[0];
-		REQUIRE(expected == actual);
-		c->resolve();
-	}
+	// this should have been loaded already!
+	this->wait_for_storage(this->c_delay, WAIT, [this, w]() {
+		return this->c->write_word(FETCH, w, 0b1);
+	});
 
 	r = c->write_word(FETCH, w, 0b1);
 	CHECK(r == OK);
-
 	c->resolve();
 
 	expected.at(1) = w;
 	actual = c->view(0, 1)[0];
 	REQUIRE(expected == actual);
-
-	delete c;
 }
 
-TEST_CASE(
-	"dram takes \"forever\", two concurrent requests different tag", "[cache]")
+TEST_CASE_METHOD(
+	CacheFixture,
+	"store 0th, 1st element different tags, in DELAY cycles, no conflict",
+	"[cache]")
 {
-	// TODO
+	Response r;
+	signed int w;
+	CHECK(expected == actual);
+
+	w = 0x11223344;
+	// delay + 1 due to internal logic, when mem
+	// finishes handle_miss still returns 'blocked'
+	this->wait_for_storage(this->m_delay + 1, BLOCKED, [this, w]() {
+		return this->c->write_word(MEM, w, 0b0);
+	});
+
+	this->wait_for_storage(this->c_delay, WAIT, [this, w]() {
+		return this->c->write_word(MEM, w, 0b0);
+	});	
+
+	r = c->write_word(MEM, w, 0b0);
+	CHECK(r == OK);
+	c->resolve();
+
+	expected.at(0) = w;
+	actual = c->view(0, 1)[0];
+	REQUIRE(expected == actual);
+
+	// write back to memory
+	this->wait_for_storage(this->m_delay + 1, BLOCKED, [this, w]() {
+		return this->c->write_word(FETCH, w, 0b10000001);
+	});
+
+	// fetch new address (don't run the completion cycle yet)
+	this->wait_for_storage(this->m_delay, BLOCKED, [this, w]() {
+		return this->c->write_word(FETCH, w, 0b10000001);
+	});
+
+	// after the fetch, this cache line should be empty
+	this->c->write_word(FETCH, w, 0b10000001);
+	CHECK(r == OK);
+	c->resolve();
+
+	expected.at(0) = 0;
+	actual = c->view(0, 1)[0];
+	CHECK(expected == actual);
+
+	this->wait_for_storage(this->c_delay, WAIT, [this, w]() {
+		return this->c->write_word(FETCH, w, 0b10000001);
+	});	
+
+	r = c->write_word(FETCH, w, 0b10000001);
+	CHECK(r == OK);
+
+	expected.at(0) = 0;
+	expected.at(1) = w;
+	actual = c->view(0, 1)[0];
+	REQUIRE(expected == actual);
 }
