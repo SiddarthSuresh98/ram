@@ -14,15 +14,3 @@ Storage::view(int base, int lines) const
 }
 
 Storage *Storage::get_lower() { return this->lower; }
-
-void Storage::resolve()
-{
-	if (this->lower)
-		this->lower->resolve();
-	if (this->wait_time == 0) {
-		this->requester = IDLE;
-		this->wait_time = delay;
-	} else if (this->requester != IDLE && !this->is_waiting) {
-		--this->wait_time;
-	}
-}

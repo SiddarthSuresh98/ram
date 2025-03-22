@@ -88,7 +88,11 @@ Response Cache::is_access_cleared(Accessor accessor, int address)
 		if (this->is_waiting)
 			r = BLOCKED;
 		else if (this->wait_time == 0) {
+			this->requester = IDLE;
+			this->wait_time = delay;
 			r = OK;
+		} else {
+			--this->wait_time;
 		}
 	}
 	return r;

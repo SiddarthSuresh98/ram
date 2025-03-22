@@ -26,8 +26,7 @@ class CacheFixture
 	{
 		for (int i = 0; i < delay; ++i) {
 			Response r = f();
-			this->c->resolve();
-
+			
 			// check response
 			CHECK(r == expected);
 			// check for early modifications
@@ -91,8 +90,7 @@ TEST_CASE_METHOD(
 		CHECK(r == BLOCKED);
 		r = c->write_word(FETCH, w, 0b1);
 		CHECK(r == WAIT);
-		this->c->resolve();
-
+		
 		// check for early modifications
 		actual = c->view(0, 1)[0];
 		REQUIRE(this->expected == this->actual);
@@ -103,8 +101,7 @@ TEST_CASE_METHOD(
 		CHECK(r == WAIT);
 		r = c->write_word(FETCH, w, 0b1);
 		CHECK(r == WAIT);
-		this->c->resolve();
-
+		
 		// check for early modifications
 		actual = c->view(0, 1)[0];
 		REQUIRE(this->expected == this->actual);
@@ -112,11 +109,6 @@ TEST_CASE_METHOD(
 
 	r = c->write_word(MEM, w, 0b0);
 	CHECK(r == OK);
-	// clock cycle did NOT resolve yet!
-	// this fetch should not make progress
-	r = c->write_word(FETCH, w, 0b1);
-	CHECK(r == WAIT);
-	c->resolve();
 
 	actual = d->view(0, 1)[0];
 	// we do NOT write back now!
@@ -133,8 +125,7 @@ TEST_CASE_METHOD(
 
 	r = c->write_word(FETCH, w, 0b1);
 	CHECK(r == OK);
-	c->resolve();
-
+	
 	expected.at(1) = w;
 	actual = c->view(0, 1)[0];
 	REQUIRE(expected == actual);
@@ -162,8 +153,7 @@ TEST_CASE_METHOD(
 
 	r = c->write_word(MEM, w, 0b0);
 	CHECK(r == OK);
-	c->resolve();
-
+	
 	expected.at(0) = w;
 	actual = c->view(0, 1)[0];
 	REQUIRE(expected == actual);
@@ -181,8 +171,7 @@ TEST_CASE_METHOD(
 	// after the fetch, this cache line should be empty
 	this->c->write_word(FETCH, w, 0b10000001);
 	CHECK(r == OK);
-	c->resolve();
-
+	
 	expected.at(0) = 0;
 	actual = c->view(0, 1)[0];
 	CHECK(expected == actual);

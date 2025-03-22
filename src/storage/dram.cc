@@ -80,9 +80,15 @@ Response Dram::is_access_cleared(Accessor accessor)
 	else {
 		if (this->requester == IDLE)
 			this->requester = accessor;
-		if (this->requester == accessor)
-			if (this->wait_time == 0)
+		if (this->requester == accessor) {
+			if (this->wait_time == 0) {
+				this->requester = IDLE;
+				this->wait_time = delay;
 				r = OK;
+			} else {
+				--this->wait_time;
+			}
+		}
 	}
 	return r;
 }

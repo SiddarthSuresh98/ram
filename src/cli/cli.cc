@@ -60,11 +60,6 @@ Cli::Cli()
 		return;
 	};
 
-	commands['c'] = [this](std::vector<std::string> args) {
-		clock();
-		return;
-	};
-
 	commands['h'] = [this](std::vector<std::string> args) {
 		help();
 		return;
@@ -84,11 +79,6 @@ void Cli::help()
 		   "specified address. Acessor must be one of: [f]etch, [m]em"
 		<< "  [p]eek <storage-level> <base> <lines> - side door function that "
 		   "peeks the current status of the entire memory subsystem"
-		<< std::endl
-		<< std::endl
-		<< "  [c]ycle - manually advances the clock" << std::endl
-		<< "  [f]orce - advances the clock until one operation reports "
-		   "completion"
 		<< std::endl
 		<< "  [r]eset - side door function that resets the memory "
 		   "configuration and "
@@ -120,12 +110,6 @@ void Cli::store(Accessor accessor, int data, int address)
 	Response r = this->cache->write_word(accessor, data, address);
 	std::cout << r << " to " << accessor << " storing " << data << " in "
 			  << address << std::endl;
-}
-
-void Cli::clock()
-{
-	this->cache->resolve();
-	++this->cycle;
 }
 
 void Cli::reset()
