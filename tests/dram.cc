@@ -1,5 +1,4 @@
 #include "dram.h"
-#include "definitions.h"
 #include <array>
 #include <catch2/catch_test_macros.hpp>
 
