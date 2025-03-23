@@ -32,7 +32,7 @@
 #define L1_CACHE_LINES static_cast<int>(pow(2, L1_CACHE_LINE_SPEC))
 
 /**
- * The total number of cycles a memory access takes.
+ * The total number of cycles a memory access takes
  */
 #define MEM_DELAY 3
 
@@ -40,6 +40,11 @@
  * The total number of cycles a level one cache access takes
  */
 #define L1_CACHE_DELAY 0
+
+/**
+ * The number of general purpose registers
+ */
+#define GPR_NUM 16
 
 /**
  * Return the N least-significant bits from integer K using a bit mask
