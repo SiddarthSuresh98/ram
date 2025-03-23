@@ -54,10 +54,6 @@ class Storage
 	 */
 	std::vector<std::array<signed int, LINE_SIZE>>
 	view(int base, int lines) const;
-	/**
-	 * Refreshes the state of this storage device and lower.
-	 */
-	void resolve();
 
 	/**
 	 * Getter for lower attribute.

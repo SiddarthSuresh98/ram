@@ -24,7 +24,6 @@ class DramFixture
 	{
 		for (int i = 0; i < delay; ++i) {
 			Response r = f();
-			this->d->resolve();
 
 			// check response
 			CHECK(r == expected);
@@ -52,7 +51,6 @@ TEST_CASE_METHOD(DramFixture, "store 0th element in DELAY cycles", "[dram]")
 	});
 
 	r = this->d->write_word(MEM, w, 0x0);
-	this->d->resolve();
 
 	CHECK(r == OK);
 	expected.at(0) = w;
@@ -76,11 +74,6 @@ TEST_CASE_METHOD(
 
 	r = d->write_word(MEM, w, 0x0);
 	REQUIRE(r == OK);
-	// clock cycle did NOT resolve yet!
-	// this fetch should not make progress
-	r = d->write_word(FETCH, w, 0x1);
-	CHECK(r == WAIT);
-	this->d->resolve();
 
 	expected.at(0) = w;
 	actual = d->view(0, 1)[0];
@@ -92,7 +85,6 @@ TEST_CASE_METHOD(
 
 	r = d->write_word(FETCH, w, 0x1);
 	CHECK(r == OK);
-	this->d->resolve();
 
 	actual = d->view(0, 1)[0];
 	expected.at(1) = w;
@@ -113,7 +105,6 @@ TEST_CASE_METHOD(
 		CHECK(r == WAIT);
 		r = this->d->write_word(FETCH, w, 0x1);
 		CHECK(r == WAIT);
-		this->d->resolve();
 
 		// check for early modifications
 		actual = d->view(0, 1)[0];
@@ -122,11 +113,6 @@ TEST_CASE_METHOD(
 
 	r = d->write_word(MEM, w, 0x0);
 	REQUIRE(r == OK);
-	// clock cycle did NOT resolve yet!
-	// this fetch should not make progress
-	r = d->write_word(FETCH, w, 0x1);
-	CHECK(r == WAIT);
-	this->d->resolve();
 
 	expected.at(0) = w;
 	actual = d->view(0, 1)[0];
@@ -138,7 +124,6 @@ TEST_CASE_METHOD(
 
 	r = d->write_word(FETCH, w, 0x1);
 	CHECK(r == OK);
-	this->d->resolve();
 
 	actual = d->view(0, 1)[0];
 	expected.at(1) = w;
@@ -182,11 +167,6 @@ TEST_CASE_METHOD(
 
 	r = this->d->write_line(MEM, buffer, 0x0);
 	REQUIRE(r == OK);
-	// clock cycle did NOT resolve yet!
-	// this fetch should not make progress
-	r = this->d->write_line(FETCH, buffer, 0x1);
-	CHECK(r == WAIT);
-	d->resolve();
 
 	expected = buffer;
 	actual = d->view(0, 1)[0];
@@ -199,7 +179,6 @@ TEST_CASE_METHOD(
 
 	r = this->d->write_line(FETCH, buffer, 0x1);
 	CHECK(r == OK);
-	d->resolve();
 
 	expected = buffer;
 	actual = d->view(0, 1)[0];
@@ -222,7 +201,6 @@ TEST_CASE_METHOD(
 		CHECK(r == WAIT);
 		r = d->write_line(FETCH, buffer, 0x1);
 		CHECK(r == WAIT);
-		this->d->resolve();
 
 		// check for early modifications
 		actual = d->view(0, 1)[0];
@@ -231,11 +209,6 @@ TEST_CASE_METHOD(
 
 	r = d->write_line(MEM, buffer, 0x0);
 	CHECK(r == OK);
-	// clock cycle did NOT resolve yet!
-	// this fetch should not make progress
-	r = d->write_line(FETCH, buffer, 0x01);
-	CHECK(r == WAIT);
-	d->resolve();
 
 	actual = d->view(0, 1)[0];
 	expected = buffer;
@@ -248,7 +221,6 @@ TEST_CASE_METHOD(
 
 	r = this->d->write_line(FETCH, buffer, 0x1);
 	CHECK(r == OK);
-	d->resolve();
 
 	expected = buffer;
 	actual = d->view(0, 1)[0];
@@ -256,7 +228,9 @@ TEST_CASE_METHOD(
 }
 
 TEST_CASE_METHOD(
-	DramFixture, "store line in DELAY cycles, read in DELAY cycles, no conflict", "[dram]")
+	DramFixture,
+	"store line in DELAY cycles, read in DELAY cycles, no conflict",
+	"[dram]")
 {
 	Response r;
 	signed int w;
@@ -269,22 +243,18 @@ TEST_CASE_METHOD(
 	for (i = 0; i < this->delay; ++i) {
 		r = d->write_line(MEM, expected, addr);
 		CHECK(r == WAIT);
-		d->resolve();
 	}
 	r = d->write_line(MEM, expected, addr);
 	CHECK(r == OK);
-	d->resolve();
 
 	for (i = 0; i < this->delay; ++i) {
 		r = d->read_line(MEM, addr, actual);
-		d->resolve();
 
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
 	}
 
 	r = d->read_line(MEM, addr, actual);
-	d->resolve();
 
 	CHECK(r == OK);
 	REQUIRE(expected == actual);
@@ -309,25 +279,18 @@ TEST_CASE_METHOD(
 
 		r = d->read_line(FETCH, addr, actual);
 		CHECK(r == WAIT);
-
-		d->resolve();
 	}
 	r = d->write_line(MEM, expected, addr);
 	CHECK(r == OK);
-	r = d->read_line(FETCH, addr, actual);
-	CHECK(r == WAIT);
-	d->resolve();
 
 	for (i = 0; i < this->delay; ++i) {
 		r = d->read_line(MEM, addr, actual);
-		d->resolve();
 
 		CHECK(r == WAIT);
 		REQUIRE(expected != actual);
 	}
 
 	r = d->read_line(MEM, addr, actual);
-	d->resolve();
 
 	CHECK(r == OK);
 	REQUIRE(expected == actual);
@@ -351,11 +314,9 @@ TEST_CASE_METHOD(
 	for (i = 0; i < this->delay; ++i) {
 		r = d->write_line(MEM, expected, addr);
 		CHECK(r == WAIT);
-		d->resolve();
 	}
 	r = d->write_line(MEM, expected, addr);
 	CHECK(r == OK);
-	d->resolve();
 
 	actual = d->view(0, 1)[0];
 	REQUIRE(expected == actual);
@@ -363,13 +324,11 @@ TEST_CASE_METHOD(
 	for (i = 0; i < LINE_SIZE; ++i) {
 		for (j = 0; j < this->delay; ++j) {
 			r = d->read_word(MEM, addr, a);
-			d->resolve();
 
 			CHECK(r == WAIT);
 			REQUIRE(0x0 == a);
 		}
 		r = d->read_word(MEM, addr++, a);
-		d->resolve();
 		CHECK(r == OK);
 		REQUIRE(w++ == a);
 
