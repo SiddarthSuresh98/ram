@@ -3,6 +3,7 @@
 #include "definitions.h"
 #include "storage.h"
 #include <ostream>
+#include <functional>
 
 class Dram : public Storage
 {
