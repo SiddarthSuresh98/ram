@@ -1,5 +1,6 @@
-<RCC>
+<!DOCTYPE RCC>
+<RCC version="1.0">
     <qresource prefix="/resources">
-        <file alias = "input.txt">resources/input.txt</file>
+        <file alias="input.txt">resources/input.txt</file>
     </qresource>
 </RCC>

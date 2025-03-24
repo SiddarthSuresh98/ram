@@ -1,6 +1,8 @@
 #include "cli.h"
 #include "definitions.h"
+#include "gui.h"
 #include "logger.h"
+#include <QApplication>
 #include <getopt.h>
 #include <iostream>
 
@@ -36,8 +38,7 @@ static void err()
 			  << std::endl;
 }
 
-static void
-parseArguments(int argc, char **argv, bool &memory_only)
+static void parseArguments(int argc, char **argv, bool &memory_only)
 {
 	struct option long_options[] = {
 		{"debug", no_argument, 0, 'd'},
@@ -74,10 +75,13 @@ int main(int argc, char **argv)
 	if (memory_only) {
 		Cli cli;
 		cli.run();
+	} else {
+		QApplication a(argc, argv);
+		Gui w;
+		w.show();
+		return a.exec();
 	}
 
-	// fork off python here
-	global_log->log(INFO, "Python started.");
 	global_log->log(INFO, "Cleaning up...");
 	global_log->log(INFO, "Goodbye!");
 	return EXIT_SUCCESS;

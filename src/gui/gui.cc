@@ -1,22 +1,22 @@
-#include "GUI.h"
-#include "./ui_GUI.h"
+#include "gui.h"
+#include "ui_gui.h"
 #include <QFile>
 #include <QTextStream>
 
-GUI::GUI(QWidget *parent)
+Gui::Gui(QWidget *parent)
     : QWidget(parent)
-    , ui(new Ui::GUI)
+    , ui(new Ui::gui)
 {
     ui->setupUi(this);
     loadTxtFile();
 }
 
-GUI::~GUI()
+Gui::~Gui()
 {
     delete ui;
 }
 
-void GUI::loadTxtFile(){
+void Gui::loadTxtFile(){
     QFile inputFile(":/resources/input.txt");
     inputFile.open(QIODevice::ReadOnly);
 
@@ -29,7 +29,7 @@ void GUI::loadTxtFile(){
     cursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
 }
 
-void GUI::on_pushButton_clicked()
+void Gui::on_pushButton_clicked()
 {
     QString searchString = ui->lineEdit->text();
     ui->textEdit->find(searchString, QTextDocument::FindWholeWords);
