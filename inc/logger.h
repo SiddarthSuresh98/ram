@@ -11,7 +11,7 @@ class Logger
   public:
 	static Logger* getInstance();
 
-	~Logger();
+	~Logger() = default;
 
 	/**
 	 * Do not allow copies.
@@ -32,15 +32,9 @@ class Logger
 	void log(LogLevel, const string &);
 
   private:
-	/**
-	 * Constructor.
-	 * @param The file name to log to.
-	 * @return A new logger object.
-	 */
-	Logger(const string &);
+	Logger() = default;
 	static Logger* logger_instance;
 	static LogLevel level;
-	static ofstream logFile;
 	static string level_to_string(LogLevel);
 	static int level_to_int(LogLevel);
 };

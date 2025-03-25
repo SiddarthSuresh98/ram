@@ -6,20 +6,7 @@
 using namespace std;
 
 LogLevel Logger::level = INFO;
-ofstream Logger::logFile;
 Logger *Logger::logger_instance;
-
-Logger::Logger(const string &filename)
-{
-	if (!filename.empty()) {
-		logFile.open(filename, ios::app);
-		if (!logFile.is_open()) {
-			cerr << "Error opening log file." << endl;
-		}
-	}
-}
-
-Logger::~Logger() { logFile.close(); }
 
 void Logger::setLevel(LogLevel level) { level = level; }
 
@@ -39,17 +26,12 @@ void Logger::log(LogLevel level, const string &message)
 			 << message << endl;
 
 	cout << logEntry.str();
-
-	if (logFile.is_open()) {
-		logFile << logEntry.str();
-		logFile.flush();
-	}
 }
 
 Logger *Logger::getInstance()
 {
 	if (logger_instance == nullptr) {
-		logger_instance = new Logger("vector.log");
+		logger_instance = new Logger();
 	}
 	return logger_instance;
 }

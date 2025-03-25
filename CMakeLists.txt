@@ -1,32 +1,34 @@
 cmake_minimum_required(VERSION 3.5)
+set(CMAKE_CXX_COMPILER "g++")
 project(risc_vector)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_compile_options(-Wall -lstdc++)
+add_compile_options(-Wall -lstdc++ -g -O0)
 add_compile_options(-Wextra -Wpedantic)
 
 # cpp standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_COMPILER "g++")
-
 # header files
 include_directories(
 	${PROJECT_SOURCE_DIR}/inc
 )
 
+# add gui
+add_subdirectory(gui)
+
 # gather source files
 file(GLOB_RECURSE SRCS "src/*.cc")
-list(REMOVE_ITEM SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cc")
 
-# find python3 components
-find_package(Python3 COMPONENTS Development REQUIRED)
+# find QT components
+find_package(Qt6 COMPONENTS Widgets REQUIRED)
+qt_standard_project_setup()
 
 # binary executable
-add_executable(${PROJECT_NAME} ${SRCS} src/main.cc)
-target_link_libraries(${PROJECT_NAME} PRIVATE Python3::Python)
+add_library(${PROJECT_NAME}_lib ${SRCS})
+target_link_libraries(${PROJECT_NAME}_lib)
 
 find_package(Catch2 REQUIRED)
 
@@ -35,7 +37,7 @@ file(GLOB_RECURSE TESTS "tests/*.cc")
 
 # test executable
 add_executable(tests ${SRCS} ${TESTS})
-target_link_libraries(tests PRIVATE Catch2::Catch2WithMain PRIVATE Python3::Python)
+target_link_libraries(tests PRIVATE Catch2::Catch2WithMain PRIVATE)
 
 # test discovery
 include(CTest)

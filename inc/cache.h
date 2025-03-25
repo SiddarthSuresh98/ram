@@ -4,6 +4,7 @@
 #include "storage.h"
 #include <array>
 #include <ostream>
+#include <functional>
 
 class Cache : public Storage
 {
