@@ -29,6 +29,11 @@ class Dram : public Storage
 	Response
 	read_word(Accessor accessor, int address, signed int &data) override;
 
+	/**
+	 * TODO This will accept a file at a later date.
+	 */
+	void load(std::vector<signed int> program);
+
   private:
 	/**
 	 * Helper for all access methods.
