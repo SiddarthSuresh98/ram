@@ -56,6 +56,16 @@ Response Dram::read_word(Accessor accessor, int address, signed int &data)
 	});
 }
 
+// TODO load a file instead and test this method
+void Dram::load(std::vector<signed int> program) {
+	unsigned long i;
+	for (i = 0; i < program.size(); ++i) {
+		int line, word;
+		get_memory_index(i, line, word);
+		this->data->at(line).at(word) = program[i];
+	}
+}
+
 Response Dram::process(
 	Accessor accessor,
 	int address,
