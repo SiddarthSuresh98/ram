@@ -10,7 +10,25 @@
  * @param the resulting index
  * @param the resulting offset
  */
-void get_bit_fields(int address, int *tag, int *index, int *offset);
+void get_cache_fields(int address, int *tag, int *index, int *offset);
+
+/**
+ * Parse an instruction into a type, opcode, and fields. If the type is invalid,
+ * only the type field will be set.
+ * @param the resulting first field, which varies per type. To call this
+ * function properly, this field must contain the full instruction bytes on
+ * function entry.
+ * @param the resulting second field, which varies per type.
+ * @param the resulting third field, which varies per type.
+ * @param the resulting type.
+ * @param the resulting opcode.
+ */
+void get_instr_fields(
+	signed int &s1,
+	signed int &s2,
+	signed int &s3,
+	unsigned int &type,
+	unsigned int &opcode);
 
 /**
  * Formats a string using snprintf.

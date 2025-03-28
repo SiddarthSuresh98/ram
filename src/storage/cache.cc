@@ -69,7 +69,7 @@ Response Cache::process(
 	Response r = this->is_access_cleared(accessor, address);
 	if (r == OK) {
 		int tag, index, offset;
-		get_bit_fields(address, &tag, &index, &offset);
+		get_cache_fields(address, &tag, &index, &offset);
 		request_handler(index, offset);
 	}
 	return r;
@@ -104,7 +104,7 @@ void Cache::handle_miss(int expected)
 	std::array<signed int, LINE_SIZE> *actual;
 	std::array<int, 2> *meta;
 
-	get_bit_fields(expected, &tag, &index, &offset);
+	get_cache_fields(expected, &tag, &index, &offset);
 	r = OK;
 	meta = &this->meta.at(index);
 	actual = &this->data->at(index);
