@@ -80,7 +80,7 @@ class Storage
 	/**
 	 * The accessor currently being serviced.
 	 */
-	enum Accessor requester;
+	Accessor requester;
 	/**
 	 * The number of cycles until the current request is completed.
 	 */
