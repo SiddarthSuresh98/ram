@@ -3,6 +3,7 @@
 #include "definitions.h"
 #include "dram.h"
 #include "response.h"
+#include "accessor.h"
 #include "utils.h"
 #include <iostream>
 
@@ -43,6 +44,7 @@ Cli::Cli()
 	};
 
 	commands['r'] = [this](std::vector<std::string> args) {
+		(void)args;
 		reset();
 		return;
 	};
@@ -61,6 +63,7 @@ Cli::Cli()
 	};
 
 	commands['h'] = [this](std::vector<std::string> args) {
+		(void)args;
 		help();
 		return;
 	};

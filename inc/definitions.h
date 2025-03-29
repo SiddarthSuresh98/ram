@@ -52,6 +52,11 @@
 #define GPR_NUM 16
 
 /**
+ * The number of vector registers
+ */
+#define V_NUM 8
+
+/**
  * The number of bits to specify an instruction type
  */
 #define TYPE_SIZE 2
