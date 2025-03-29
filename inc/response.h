@@ -6,6 +6,7 @@ enum Response {
 	OK,
 	WAIT,
 	BLOCKED,
+	STALLED,
 };
 
 std::ostream &operator<<(std::ostream &os, Response r);
