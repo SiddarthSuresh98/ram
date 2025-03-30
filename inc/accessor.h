@@ -4,7 +4,10 @@
 
 enum Accessor {
 	IDLE,
+	WRITE,
 	MEM,
+	EXEC,
+	DCDE,
 	FETCH,
 	L1CACHE,
 	SIDE,

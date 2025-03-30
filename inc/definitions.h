@@ -11,6 +11,10 @@
  * The total number of words in a line
  */
 #define LINE_SIZE static_cast<int>(pow(2, 2))
+/**
+ * Number of bits in a word
+ */
+#define WORD_SPEC 32
 
 /**
  * The number of bits to specify a memory word
@@ -28,7 +32,8 @@
  * The total number of lines in l1 cache
  */
 #define L1_CACHE_WORD_SPEC 7
-#define L1_CACHE_LINE_SPEC static_cast<unsigned int>(L1_CACHE_WORD_SPEC - LINE_SPEC)
+#define L1_CACHE_LINE_SPEC                                                     \
+	static_cast<unsigned int>(L1_CACHE_WORD_SPEC - LINE_SPEC)
 #define L1_CACHE_LINES static_cast<int>(pow(2, L1_CACHE_LINE_SPEC))
 
 /**
@@ -45,6 +50,31 @@
  * The number of general purpose registers
  */
 #define GPR_NUM 16
+
+/**
+ * The number of vector registers
+ */
+#define V_NUM 8
+
+/**
+ * The number of bits to specify an instruction type
+ */
+#define TYPE_SIZE 2
+
+/**
+ * The number of bits to specify a register
+ */
+#define REG_SIZE 5
+
+/**
+ * The number of bits to specify an R-Type opcode.
+ */
+#define R_OPCODE_SIZE 5
+
+/**
+ * The number of bits to specify an opcode.
+ */
+#define OPCODE_SIZE 4
 
 /**
  * Return the N least-significant bits from integer K using a bit mask

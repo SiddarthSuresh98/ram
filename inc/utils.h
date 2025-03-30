@@ -10,7 +10,7 @@
  * @param the resulting index
  * @param the resulting offset
  */
-void get_bit_fields(int address, int *tag, int *index, int *offset);
+void get_cache_fields(int address, int *tag, int *index, int *offset);
 
 /**
  * Formats a string using snprintf.

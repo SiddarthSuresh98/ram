@@ -3,6 +3,8 @@
 
 std::ostream &operator<<(std::ostream &os, Accessor a)
 {
-	const std::string nameA[] = {"IDLE", "MEM", "FETCH", "L1CACHE", "SIDE"};
+	const std::string nameA[] = {
+		"IDLE", "WRITE", "MEM", "EXEC", "DCDE", "FETCH", "L1CACHE", "SIDE",
+	};
 	return os << nameA[a];
 }

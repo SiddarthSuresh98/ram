@@ -2,21 +2,21 @@
 #include "definitions.h"
 #include <catch2/catch_test_macros.hpp>
 
-TEST_CASE("Parse arbitrary fields # one", "[cache]")
+TEST_CASE("Parse arbitrary fields # one", "[utils]")
 {
 	int tag, index, offset;
 	int address = 0b0001010101;
-	get_bit_fields(address, &tag, &index, &offset);
+	get_cache_fields(address, &tag, &index, &offset);
 	CHECK(tag == 0b000);
 	CHECK(index == 0b10101);
 	CHECK(offset == 0b01);
 }
 
-TEST_CASE("Parse arbitrary fields # two", "[cache]")
+TEST_CASE("Parse arbitrary fields # two", "[utils]")
 {
 	int tag, index, offset;
 	int address = 0b0100111011;
-	get_bit_fields(address, &tag, &index, &offset);
+	get_cache_fields(address, &tag, &index, &offset);
 	CHECK(tag == 0b010);
 	CHECK(index == 0b01110);
 	CHECK(offset == 0b11);
