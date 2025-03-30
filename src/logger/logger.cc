@@ -8,11 +8,11 @@ using namespace std;
 LogLevel Logger::level = INFO;
 Logger *Logger::logger_instance;
 
-void Logger::setLevel(LogLevel level) { level = level; }
+void Logger::setLevel(LogLevel level) { this->level = level; }
 
 void Logger::log(LogLevel level, const string &message)
 {
-	if (level_to_int(level) > level_to_int(level)) {
+	if (level_to_int(level) > level_to_int(this->level)) {
 		return;
 	}
 
@@ -65,9 +65,7 @@ int Logger::level_to_int(LogLevel level)
 		return 3;
 	case ERROR:
 		return 2;
-	case CRITICAL:
-		return 1;
 	default:
-		return 0;
+		return 1;
 	}
 }
