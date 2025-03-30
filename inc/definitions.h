@@ -77,6 +77,12 @@
 #define OPCODE_SIZE 4
 
 /**
+ * The maximum value an integer can hold.
+ * The minimum is always this number plus one negated.
+ */
+#define MAX_INT 2147483647
+
+/**
  * Return the N least-significant bits from integer K using a bit mask
  * @param the integer to be parsed
  * @param the number of bits to be parsed
