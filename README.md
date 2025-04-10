@@ -1,5 +1,8 @@
 # Risc V[ECTOR]
 
+## Corresponding Assembler can be found here
+`https://github.com/bdunahu/rva`
+
 ## dependencies
 - cmake
 - g++ (GCC) 11.4.0
