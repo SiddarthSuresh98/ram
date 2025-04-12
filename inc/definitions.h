@@ -73,14 +73,14 @@
 #define GET_FIELDS(a, t, i, o) \
     *(t) = GET_MID_BITS(a, L1_CACHE_LINE_SPEC + LINE_SPEC, MEM_WORD_SPEC); \
     *(i) = GET_MID_BITS(a, LINE_SPEC, L1_CACHE_LINE_SPEC + LINE_SPEC); \
-    *(o) = GET_LS_BITS(a, LINE_SPEC); \
+    *(o) = GET_LS_BITS(a, LINE_SPEC)
 
 /**
  * Ensures address is within the current memory size using a clean wrap.
  * @param an address
  */
 #define WRAP_ADDRESS(a) \
-  ((a < 0) ? ((a % MEM_WORDS) + MEM_WORDS) % MEM_WORDS : a % MEM_WORDS) \
+  ((a < 0) ? ((a % MEM_WORDS) + MEM_WORDS) % MEM_WORDS : a % MEM_WORDS)
 // clang-format on
 
 #endif /* DEFINITIONS_H_INCLUDED */

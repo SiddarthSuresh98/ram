@@ -2,10 +2,10 @@
 #include <array>
 #include <catch2/catch_test_macros.hpp>
 
-class DramFixture
+class D
 {
   public:
-	DramFixture()
+	D()
 	{
 		this->delay = 3;
 		this->d = new Dram(this->delay);
@@ -15,7 +15,7 @@ class DramFixture
 		this->actual = this->d->view(0, 1)[0];
 	}
 
-	~DramFixture()
+	~D()
 	{
 		delete this->d;
 		delete this->mem;
@@ -44,14 +44,15 @@ class DramFixture
 	std::array<signed int, LINE_SIZE> actual;
 };
 
-TEST_CASE_METHOD(DramFixture, "store 0th element in DELAY cycles", "[dram]")
+TEST_CASE_METHOD(D, "store 0th element in DELAY cycles", "[dram]")
 {
 	int r;
 	signed int w;
 	CHECK(expected == actual);
 
 	w = 0x11223344;
-	this->wait_for_storage(this->delay, [this, w]() { return this->d->write_word(this->mem, w, 0x0); });
+	this->wait_for_storage(
+		this->delay, [this, w]() { return this->d->write_word(this->mem, w, 0x0); });
 
 	r = this->d->write_word(this->mem, w, 0x0);
 
@@ -61,14 +62,15 @@ TEST_CASE_METHOD(DramFixture, "store 0th element in DELAY cycles", "[dram]")
 	REQUIRE(expected == actual);
 }
 
-TEST_CASE_METHOD(DramFixture, "store 0th, 1st element in DELAY cycles, no conflict", "[dram]")
+TEST_CASE_METHOD(D, "store 0th, 1st element in DELAY cycles, no conflict", "[dram]")
 {
 	int r;
 	signed int w;
 	CHECK(expected == actual);
 
 	w = 0x11223344;
-	this->wait_for_storage(this->delay, [this, w]() { return this->d->write_word(this->mem, w, 0x0); });
+	this->wait_for_storage(
+		this->delay, [this, w]() { return this->d->write_word(this->mem, w, 0x0); });
 
 	r = d->write_word(this->mem, w, 0x0);
 	REQUIRE(r);
@@ -77,7 +79,8 @@ TEST_CASE_METHOD(DramFixture, "store 0th, 1st element in DELAY cycles, no confli
 	actual = d->view(0, 1)[0];
 	REQUIRE(expected == actual);
 
-	this->wait_for_storage(this->delay, [this, w]() { return this->d->write_word(this->fetch, w, 0x1); });
+	this->wait_for_storage(
+		this->delay, [this, w]() { return this->d->write_word(this->fetch, w, 0x1); });
 
 	r = d->write_word(this->fetch, w, 0x1);
 	CHECK(r);
@@ -87,7 +90,7 @@ TEST_CASE_METHOD(DramFixture, "store 0th, 1st element in DELAY cycles, no confli
 	REQUIRE(expected == actual);
 }
 
-TEST_CASE_METHOD(DramFixture, "store 0th element in DELAY cycles with conflict", "[dram]")
+TEST_CASE_METHOD(D, "store 0th element in DELAY cycles with conflict", "[dram]")
 {
 	int r, i;
 	signed int w;
@@ -112,7 +115,8 @@ TEST_CASE_METHOD(DramFixture, "store 0th element in DELAY cycles with conflict",
 	actual = d->view(0, 1)[0];
 	REQUIRE(expected == actual);
 
-	this->wait_for_storage(this->delay, [this, w]() { return this->d->write_word(this->fetch, w, 0x1); });
+	this->wait_for_storage(
+		this->delay, [this, w]() { return this->d->write_word(this->fetch, w, 0x1); });
 
 	r = d->write_word(this->fetch, w, 0x1);
 	CHECK(r);
@@ -122,7 +126,7 @@ TEST_CASE_METHOD(DramFixture, "store 0th element in DELAY cycles with conflict",
 	REQUIRE(expected == actual);
 }
 
-TEST_CASE_METHOD(DramFixture, "store line in DELAY cycles", "[dram]")
+TEST_CASE_METHOD(D, "store line in DELAY cycles", "[dram]")
 {
 	int r;
 	signed int w;
@@ -142,7 +146,7 @@ TEST_CASE_METHOD(DramFixture, "store line in DELAY cycles", "[dram]")
 	REQUIRE(expected == actual);
 }
 
-TEST_CASE_METHOD(DramFixture, "store line in DELAY cycles no conflict", "[dram]")
+TEST_CASE_METHOD(D, "store line in DELAY cycles no conflict", "[dram]")
 {
 	int r;
 	signed int w;
@@ -173,7 +177,7 @@ TEST_CASE_METHOD(DramFixture, "store line in DELAY cycles no conflict", "[dram]"
 	REQUIRE(expected == actual);
 }
 
-TEST_CASE_METHOD(DramFixture, "store line in DELAY cycles with conflict", "[dram]")
+TEST_CASE_METHOD(D, "store line in DELAY cycles with conflict", "[dram]")
 {
 	int r, i;
 	signed int w;
@@ -212,8 +216,7 @@ TEST_CASE_METHOD(DramFixture, "store line in DELAY cycles with conflict", "[dram
 	REQUIRE(expected == actual);
 }
 
-TEST_CASE_METHOD(
-	DramFixture, "store line in DELAY cycles, read in DELAY cycles, no conflict", "[dram]")
+TEST_CASE_METHOD(D, "store line in DELAY cycles, read in DELAY cycles, no conflict", "[dram]")
 {
 	int r, i, addr;
 	signed int w;
@@ -242,8 +245,7 @@ TEST_CASE_METHOD(
 	REQUIRE(expected == actual);
 }
 
-TEST_CASE_METHOD(
-	DramFixture, "store line in DELAY cycles, read in DELAY cycles with conflict", "[dram]")
+TEST_CASE_METHOD(D, "store line in DELAY cycles, read in DELAY cycles with conflict", "[dram]")
 {
 	int r, i, addr;
 	signed int w;
@@ -276,7 +278,7 @@ TEST_CASE_METHOD(
 }
 
 TEST_CASE_METHOD(
-	DramFixture,
+	D,
 	"store line in DELAY cycles, read one element at a time in DELAY cycles "
 	"with conflict",
 	"[dram]")
