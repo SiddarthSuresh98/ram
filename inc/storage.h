@@ -1,8 +1,6 @@
 #ifndef STORAGE_H
 #define STORAGE_H
-#include "accessor.h"
 #include "definitions.h"
-#include "response.h"
 #include <algorithm>
 #include <array>
 #include <map>
@@ -11,6 +9,12 @@
 class Storage
 {
   public:
+	/**
+	 * Constructor.
+	 * @param The time an access to this storage device takes.
+	 * @return A newly allocated storage object.
+	 */
+	Storage(int delay);
 	virtual ~Storage() = default;
 
 	/**
@@ -18,33 +22,25 @@ class Storage
 	 * @param the source making the request.
 	 * @param the data (hexadecimal) to write.
 	 * @param the address to write to.
-	 * @return a status code reflecting the state of the request.
+	 * @return 1 if the request was completed, 0 otherwise.
 	 */
-	virtual Response write_word(Accessor accessor, signed int data, int address) = 0;
+	virtual int
+	write_word(void *id, signed int data, int address) = 0;
+	virtual int
+	write_line(void *id, std::array<signed int, LINE_SIZE> data_line, int address) = 0;
 
-	/**
-	 * Write a data line to given address in this level of storage
-	 */
-	virtual Response write_line(Accessor accessor, std::array<signed int, LINE_SIZE> data_line, int address) = 0;
-
-	
 	/**
 	 * Get the data line at `address`.
 	 * @param the source making the request.
 	 * @param the address being accessed.
-	 * @return a status code reflecting the state of the request, and the
-	 * data being returned.
+	 * @param the data being returned
+	 * @return 1 if the request was completed, 0 otherwise
 	 */
-	virtual Response read_line(
-		Accessor accessor,
-		int address,
-		std::array<signed int, LINE_SIZE> &data) = 0;
+	virtual int
+	read_line(void *id, int address, std::array<signed int, LINE_SIZE> &data) = 0;
+	virtual int
+	read_word(void *id, int address, signed int &data) = 0;
 
-	/**
-	 * Read a word from given address in this level of storage
-	 */
-	virtual Response read_word(Accessor accessor, int address, signed int &data) = 0;
-	
 	/**
 	 * Sidedoor view of `lines` of memory starting at `base`.
 	 * @param The base line to start getting memory from.
@@ -54,13 +50,6 @@ class Storage
 	 */
 	std::vector<std::array<signed int, LINE_SIZE>>
 	view(int base, int lines) const;
-
-	/**
-	 * Getter for lower attribute.
-	 * TODO this doesn't seem like good object-oriented practice.
-	 * @return this->lower
-	 */
-	Storage *get_lower();
 
   protected:
 	/**
@@ -73,23 +62,18 @@ class Storage
 	 */
 	Storage *lower;
 	/**
+	 * The id currently being serviced.
+	 */
+	void *current_request;
+	/**
 	 * The number of clock cycles this level of storage takes to complete
 	 * requests.
 	 */
 	int delay;
 	/**
-	 * The accessor currently being serviced.
-	 */
-	Accessor requester;
-	/**
 	 * The number of cycles until the current request is completed.
 	 */
 	int wait_time;
-	/**
-	 * A flag indicating whether this level of storage is currently waiting for
-	 * a lower level.
-	 */
-	int is_waiting;
 };
 
 #endif /* STORAGE_H_INCLUDED */

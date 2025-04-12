@@ -2,8 +2,8 @@
 #define DRAM_H
 #include "definitions.h"
 #include "storage.h"
-#include <ostream>
 #include <functional>
+#include <ostream>
 
 class Dram : public Storage
 {
@@ -16,47 +16,42 @@ class Dram : public Storage
 	Dram(int delay);
 	~Dram();
 
-	Response
-	write_word(Accessor accessor, signed int data, int address) override;
-	Response read_line(
-		Accessor accessor,
-		int address,
-		std::array<signed int, LINE_SIZE> &data_line) override;
-	Response write_line(
-		Accessor accessor,
-		std::array<signed int, LINE_SIZE> data_line,
-		int address) override;
-	Response
-	read_word(Accessor accessor, int address, signed int &data) override;
+	int
+	write_word(void *, signed int, int) override;
+	int
+	write_line(void *, std::array<signed int, LINE_SIZE>, int) override;
+	int
+	read_word(void *, int, signed int &) override;
+	int
+	read_line(void *, int, std::array<signed int, LINE_SIZE> &) override;
 
 	/**
 	 * TODO This will accept a file at a later date.
 	 */
-	void load(std::vector<signed int> program);
+	void
+	load(std::vector<signed int> program);
 
   private:
 	/**
 	 * Helper for all access methods.
-	 * Calls `request_handler` when `accessor` is allowed to complete its
+	 * Calls `request_handler` when `id` is allowed to complete its
 	 * request cycle.
 	 * @param the source making the request
 	 * @param the address to write to
 	 * @param the function to call when an access should be completed
+	 * @return 1 if the access completed successfully, 0 otherwise
 	 */
-	Response process(
-		Accessor accessor,
-		int address,
-		std::function<void(int line, int word)> request_handler);
+	int
+	process(void *id, int address, std::function<void(int line, int word)> request_handler);
 	/**
-	 * Returns OK if `accessor` is allowed to complete its request this cycle.
-	 * Handles wait times, side door, and setting the current accessor this
+	 * Returns OK if `id` is allowed to complete its request this cycle.
+	 * Handles wait times, side door, and setting the current id this
 	 * storage is serving.
-	 * @param the accessor asking for a resource
-	 * @return whether or not the access can be carried out this function call.
+	 * @param the source making the request
+	 * @return 1 if the access can be completed this function call, 0 otherwise
 	 */
-	Response is_access_cleared(Accessor accessor);
+	int
+	is_access_cleared(void *id);
 };
-
-std::ostream &operator<<(std::ostream &os, const Dram &d);
 
 #endif /* DRAM_H_INCLUDED */
