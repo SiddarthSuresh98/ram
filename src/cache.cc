@@ -1,6 +1,5 @@
 #include "cache.h"
 #include "definitions.h"
-#include "utils.h"
 #include <bits/stdc++.h>
 #include <iterator>
 
@@ -60,7 +59,7 @@ Cache::process(void *id, int address, std::function<void(int index, int offset)>
 	r = this->is_access_cleared(id, address);
 	if (r) {
 		int tag, index, offset;
-		get_cache_fields(address, &tag, &index, &offset);
+		GET_FIELDS(address, &tag, &index, &offset);
 		request_handler(index, offset);
 	}
 	return r;
@@ -95,7 +94,7 @@ Cache::is_address_missing(int expected)
 	std::array<signed int, LINE_SIZE> *actual;
 	std::array<int, 2> *meta;
 
-	get_cache_fields(expected, &tag, &index, &offset);
+	GET_FIELDS(expected, &tag, &index, &offset);
 	r = 0;
 	meta = &this->meta.at(index);
 	actual = &this->data->at(index);

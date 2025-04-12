@@ -4,7 +4,6 @@
 #include <bits/stdc++.h>
 #include <bitset>
 #include <iterator>
-#include <utils.h>
 
 Dram::Dram(int delay) : Storage(delay) { this->data->resize(MEM_LINES); }
 
@@ -84,4 +83,11 @@ Dram::is_access_cleared(void *id)
 		}
 	}
 	return 0;
+}
+
+void
+Dram::get_memory_index(int address, int &line, int &word)
+{
+	line = WRAP_ADDRESS(address) / LINE_SIZE;
+	word = address % LINE_SIZE;
 }

@@ -52,6 +52,13 @@ class Dram : public Storage
 	 */
 	int
 	is_access_cleared(void *id);
+	/**
+	 * Given `address`, returns the line and word it is in.
+	 * @param an address
+	 * @param the line (row) `address` is in
+	 * @param the word (column) `address` corresponds to
+	 */
+	void get_memory_index(int address, int &line, int &word);
 };
 
 #endif /* DRAM_H_INCLUDED */
