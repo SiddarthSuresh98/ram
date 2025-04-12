@@ -1,21 +1,14 @@
 #include "cache.h"
 #include "definitions.h"
-#include "response.h"
 #include "utils.h"
 #include <bits/stdc++.h>
-#include <iostream>
 #include <iterator>
 
-Cache::Cache(Storage *lower, int delay)
+Cache::Cache(Storage *lower, int delay) : Storage(delay)
 {
-	this->data = new std::vector<std::array<signed int, LINE_SIZE>>;
 	this->data->resize(L1_CACHE_LINES);
-	this->delay = delay;
-	this->is_waiting = false;
 	this->lower = lower;
 	this->meta.fill({-1, -1});
-	this->requester = IDLE;
-	this->wait_time = this->delay;
 }
 
 Cache::~Cache()
@@ -24,18 +17,19 @@ Cache::~Cache()
 	delete this->data;
 }
 
-Response Cache::write_word(Accessor accessor, signed int data, int address)
+int
+Cache::write_word(void *id, signed int data, int address)
 {
-	return process(accessor, address, [&](int index, int offset) {
+	return process(id, address, [&](int index, int offset) {
 		this->data->at(index).at(offset) = data;
 		this->meta[index].at(1) = 1;
 	});
 }
 
-Response Cache::write_line(
-	Accessor accessor, std::array<signed int, LINE_SIZE> data_line, int address)
+int
+Cache::write_line(void *id, std::array<signed int, LINE_SIZE> data_line, int address)
 {
-	return process(accessor, address, [&](int index, int offset) {
+	return process(id, address, [&](int index, int offset) {
 		(void)offset;
 		this->data->at(index) = data_line;
 		this->meta[index].at(1) = 1;
@@ -43,31 +37,28 @@ Response Cache::write_line(
 }
 
 // TODO: tests for multi level cache
-Response Cache::read_line(
-	Accessor accessor,
-	int address,
-	std::array<signed int, LINE_SIZE> &data_line)
+int
+Cache::read_line(void *id, int address, std::array<signed int, LINE_SIZE> &data_line)
 {
-	return process(accessor, address, [&](int index, int offset) {
+	return process(id, address, [&](int index, int offset) {
 		(void)offset;
 		data_line = this->data->at(index);
 	});
 }
 
-Response Cache::read_word(Accessor accessor, int address, signed int &data)
+int
+Cache::read_word(void *id, int address, signed int &data)
 {
-	return process(accessor, address, [&](int index, int offset) {
-		data = this->data->at(index).at(offset);
-	});
+	return process(
+		id, address, [&](int index, int offset) { data = this->data->at(index).at(offset); });
 }
 
-Response Cache::process(
-	Accessor accessor,
-	int address,
-	std::function<void(int index, int offset)> request_handler)
+int
+Cache::process(void *id, int address, std::function<void(int index, int offset)> request_handler)
 {
-	Response r = this->is_access_cleared(accessor, address);
-	if (r == OK) {
+	int r;
+	r = this->is_access_cleared(id, address);
+	if (r) {
 		int tag, index, offset;
 		get_cache_fields(address, &tag, &index, &offset);
 		request_handler(index, offset);
@@ -75,106 +66,64 @@ Response Cache::process(
 	return r;
 }
 
-Response Cache::is_access_cleared(Accessor accessor, int address)
+int
+Cache::is_access_cleared(void *id, int address)
 {
-	Response r;
-	r = WAIT;
 	/* Do this first--then process the first cycle immediately. */
-	if (this->requester == IDLE)
-		this->requester = accessor;
-	if (this->requester == accessor) {
-		handle_miss(address);
-		if (this->is_waiting)
-			r = BLOCKED;
+	if (id == nullptr)
+		throw std::invalid_argument("Accessor cannot be nullptr.");
+	if (this->current_request == nullptr)
+		this->current_request = id;
+	if (this->current_request == id) {
+		if (is_address_missing(address))
+			return 0;
 		else if (this->wait_time == 0) {
-			this->requester = IDLE;
+			this->current_request = nullptr;
 			this->wait_time = delay;
-			r = OK;
+			return 1;
 		} else {
 			--this->wait_time;
 		}
 	}
-	return r;
+	return 0;
 }
 
-void Cache::handle_miss(int expected)
+int
+Cache::is_address_missing(int expected)
 {
-	Response r, q;
-	int tag, index, offset;
+	int r, q, tag, index, offset;
 	std::array<signed int, LINE_SIZE> *actual;
 	std::array<int, 2> *meta;
 
 	get_cache_fields(expected, &tag, &index, &offset);
-	r = OK;
+	r = 0;
 	meta = &this->meta.at(index);
 	actual = &this->data->at(index);
 
 	if (meta->at(0) != tag) {
-		r = WAIT;
-		// address not in cache
+		r = 1;
 		if (meta->at(1) >= 0) {
-			// occupant is dirty
-			// writing line to DRam in case of dirty cache eviction
 			q = this->lower->write_line(
-				L1CACHE, *actual,
-				((index << LINE_SPEC) +
-				 (meta->at(0) << (L1_CACHE_LINE_SPEC + LINE_SPEC))));
-			if (q == OK) {
+				this, *actual,
+				((index << LINE_SPEC) + (meta->at(0) << (L1_CACHE_LINE_SPEC + LINE_SPEC))));
+			if (q) {
 				meta->at(1) = -1;
 			}
 		} else {
-			q = this->lower->read_line(L1CACHE, expected, *actual);
-			if (q == OK) {
+			q = this->lower->read_line(this, expected, *actual);
+			if (q) {
 				meta->at(0) = tag;
 			}
 		}
 	}
 
-	this->is_waiting = (r == OK) ? false : true;
+	return r;
 }
 
-std::array<std::array<int, 2>, L1_CACHE_LINES> Cache::get_meta() const
+std::array<std::array<int, 2>, L1_CACHE_LINES>
+Cache::get_meta() const
 {
 	std::array<std::array<int, 2>, L1_CACHE_LINES> ret;
 	std::copy(std::begin(this->meta), std::end(this->meta), std::begin(ret));
 	return ret;
-}
-
-std::ostream &operator<<(std::ostream &os, const Cache &c)
-{
-	const auto default_flags = std::cout.flags();
-	const auto default_fill = std::cout.fill();
-
-	std::vector<std::array<signed int, LINE_SIZE>> data =
-		c.view(0, L1_CACHE_LINES);
-	std::array<std::array<int, 2>, L1_CACHE_LINES> meta = c.get_meta();
-
-	os << " " << std::setfill(' ') << std::setw(L1_CACHE_LINE_SPEC + 2)
-	   << "INDEX"
-	   << " | " << std::setfill(' ') << std::setw((8 + 3) * 4 - 1) << "DATA"
-	   << " | " << std::setfill(' ')
-	   << std::setw(MEM_LINE_SPEC - L1_CACHE_LINE_SPEC + 2) << "TAG"
-	   << " | D" << std::endl;
-	for (int i = 0; i < L1_CACHE_LINES; ++i) {
-		os << " 0b" << std::setw(L1_CACHE_LINE_SPEC)
-		   << std::bitset<L1_CACHE_LINE_SPEC>(i) << " | ";
-		for (int j = 0; j < LINE_SIZE; ++j) {
-			os << "0x" << std::setfill('0') << std::setw(8) << std::hex
-			   << data.at(i).at(j) << " ";
-		}
-		os << "| 0b" << std::setfill(' ');
-
-		if (meta.at(i)[0] < 0)
-			os << std::setfill('?')
-			   << std::setw(MEM_LINE_SPEC - L1_CACHE_LINE_SPEC) << "";
-		else
-			os << std::bitset<MEM_LINE_SPEC - L1_CACHE_LINE_SPEC>(
-				meta.at(i)[0]);
-
-		os << " | " << (int)(meta.at(i)[0] >= 0) << std::endl;
-	}
-
-	std::cout.flags(default_flags);
-	std::cout.fill(default_fill);
-	return os;
 }

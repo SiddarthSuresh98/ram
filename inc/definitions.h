@@ -1,6 +1,5 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
-#include "logger.h"
 #include <cmath>
 
 /**
