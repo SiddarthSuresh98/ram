@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 set(CMAKE_CXX_COMPILER "g++")
-project(risc_vector)
+project(ram)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -16,15 +16,8 @@ include_directories(
 	${PROJECT_SOURCE_DIR}/inc
 )
 
-# add gui
-add_subdirectory(gui)
-
 # gather source files
 file(GLOB_RECURSE SRCS "src/*.cc")
-
-# find QT components
-find_package(Qt6 COMPONENTS Widgets REQUIRED)
-qt_standard_project_setup()
 
 # binary executable
 add_library(${PROJECT_NAME}_lib ${SRCS})
