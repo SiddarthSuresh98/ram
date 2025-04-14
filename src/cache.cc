@@ -1,13 +1,17 @@
 #include "cache.h"
 #include "definitions.h"
-#include <bits/stdc++.h>
+#include <iostream>
 #include <iterator>
 
-Cache::Cache(Storage *lower, int delay) : Storage(delay)
+Cache::Cache(Storage *lower, unsigned int size, int delay) : Storage(delay)
 {
-	this->data->resize(L1_CACHE_LINES);
+	int true_size;
+
+	true_size = 1 << size;
+	this->data->resize(true_size);
+	this->meta = std::vector<std::array<signed int, 2>>(true_size, {-1, -1});
+	this->size = size;
 	this->lower = lower;
-	this->meta.fill({-1, -1});
 }
 
 Cache::~Cache()
@@ -35,7 +39,6 @@ Cache::write_line(void *id, std::array<signed int, LINE_SIZE> data_line, int add
 	});
 }
 
-// TODO: tests for multi level cache
 int
 Cache::read_line(void *id, int address, std::array<signed int, LINE_SIZE> &data_line)
 {
@@ -103,8 +106,7 @@ Cache::is_address_missing(int expected)
 		r = 1;
 		if (meta->at(1) >= 0) {
 			q = this->lower->write_line(
-				this, *actual,
-				((index << LINE_SPEC) + (meta->at(0) << (L1_CACHE_LINE_SPEC + LINE_SPEC))));
+				this, *actual, ((index << LINE_SPEC) + (meta->at(0) << (this->size + LINE_SPEC))));
 			if (q) {
 				meta->at(1) = -1;
 			}
@@ -117,12 +119,4 @@ Cache::is_address_missing(int expected)
 	}
 
 	return r;
-}
-
-std::array<std::array<int, 2>, L1_CACHE_LINES>
-Cache::get_meta() const
-{
-	std::array<std::array<int, 2>, L1_CACHE_LINES> ret;
-	std::copy(std::begin(this->meta), std::end(this->meta), std::begin(ret));
-	return ret;
 }

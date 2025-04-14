@@ -6,12 +6,19 @@
 #include <catch2/catch_test_macros.hpp>
 #include <functional>
 
+/**
+ * one way associative, single level
+ */
 class C11
 {
   public:
-	C11() : m_delay(4), c_delay(2), mem(new int), fetch(new int)
+	C11()
 	{
-		this->c = new Cache(new Dram(this->m_delay), this->c_delay);
+		this->m_delay = 4;
+		this->c_delay = 2;
+		this->mem = new int();
+		this->fetch = new int();
+		this->c = new Cache(new Dram(this->m_delay), 5, this->c_delay);
 		this->expected = {0, 0, 0, 0};
 		this->actual = this->c->view(0, 1)[0];
 	}

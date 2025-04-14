@@ -26,15 +26,6 @@
 #define MEM_LINES static_cast<int>(pow(2, MEM_LINE_SPEC))
 
 /**
- * The number of bits to specify a l1 cache word
- * The number of bits to specify a l1 cache line
- * The total number of lines in l1 cache
- */
-#define L1_CACHE_WORD_SPEC 7
-#define L1_CACHE_LINE_SPEC static_cast<unsigned int>(L1_CACHE_WORD_SPEC - LINE_SPEC)
-#define L1_CACHE_LINES static_cast<int>(pow(2, L1_CACHE_LINE_SPEC))
-
-/**
  * The total number of cycles a memory access takes
  */
 #define MEM_DELAY 3
@@ -60,27 +51,5 @@
  * @return a section of bits from K
  */
 #define GET_MID_BITS(k, m, n) GET_LS_BITS((k) >> (m), ((n) - (m)))
-
-/**
- * Parse an address into a tag, index into the cache table, and a line
- * offset.
- * @param the address to be parsed
- * @param the resulting tag
- * @param the resulting index
- * @param the resulting offset
- */
-// clang-format off
-#define GET_FIELDS(a, t, i, o) \
-    *(t) = GET_MID_BITS(a, L1_CACHE_LINE_SPEC + LINE_SPEC, MEM_WORD_SPEC); \
-    *(i) = GET_MID_BITS(a, LINE_SPEC, L1_CACHE_LINE_SPEC + LINE_SPEC); \
-    *(o) = GET_LS_BITS(a, LINE_SPEC)
-
-/**
- * Ensures address is within the current memory size using a clean wrap.
- * @param an address
- */
-#define WRAP_ADDRESS(a) \
-  ((a < 0) ? ((a % MEM_WORDS) + MEM_WORDS) % MEM_WORDS : a % MEM_WORDS)
-// clang-format on
 
 #endif /* DEFINITIONS_H_INCLUDED */

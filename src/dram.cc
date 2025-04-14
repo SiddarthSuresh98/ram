@@ -24,7 +24,6 @@ Dram::write_word(void *id, signed int data, int address)
 	return process(id, address, [&](int line, int word) { this->data->at(line).at(word) = data; });
 }
 
-// TODO requires testing
 int
 Dram::read_line(void *id, int address, std::array<signed int, LINE_SIZE> &data_line)
 {
