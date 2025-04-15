@@ -24,10 +24,8 @@ class Storage
 	 * @param the address to write to.
 	 * @return 1 if the request was completed, 0 otherwise.
 	 */
-	virtual int
-	write_word(void *id, signed int data, int address) = 0;
-	virtual int
-	write_line(void *id, std::array<signed int, LINE_SIZE> data_line, int address) = 0;
+	virtual int write_word(void *id, signed int data, int address) = 0;
+	virtual int write_line(void *id, std::array<signed int, LINE_SIZE> data_line, int address) = 0;
 
 	/**
 	 * Get the data line at `address`.
@@ -36,10 +34,8 @@ class Storage
 	 * @param the data being returned
 	 * @return 1 if the request was completed, 0 otherwise
 	 */
-	virtual int
-	read_line(void *id, int address, std::array<signed int, LINE_SIZE> &data) = 0;
-	virtual int
-	read_word(void *id, int address, signed int &data) = 0;
+	virtual int read_line(void *id, int address, std::array<signed int, LINE_SIZE> &data) = 0;
+	virtual int read_word(void *id, int address, signed int &data) = 0;
 
 	/**
 	 * Sidedoor view of `lines` of memory starting at `base`.
@@ -48,10 +44,16 @@ class Storage
 	 * @return A matrix of data values, where each row is a line and each column
 	 * is a word.
 	 */
-	std::vector<std::array<signed int, LINE_SIZE>>
-	view(int base, int lines) const;
+	std::vector<std::array<signed int, LINE_SIZE>> view(int base, int lines) const;
 
   protected:
+	/**
+	 * Returns OK if `id` should complete its request this cycle. In the case it can, automatically
+	 * clears the current requester.
+	 * @param the id asking for a resource
+	 * @return 1 if the access can be carried out this function call, 0 otherwise.
+	 */
+	int is_access_cleared();
 	/**
 	 * The data currently stored in this level of storage.
 	 */

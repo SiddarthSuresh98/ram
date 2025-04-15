@@ -2,7 +2,8 @@
 #include "definitions.h"
 #include <algorithm>
 
-Storage::Storage(int delay) {
+Storage::Storage(int delay)
+{
 	this->data = new std::vector<std::array<signed int, LINE_SIZE>>;
 	this->delay = delay;
 	this->lower = nullptr;
@@ -17,4 +18,21 @@ Storage::view(int base, int lines) const
 	std::vector<std::array<signed int, LINE_SIZE>> ret(lines + 1);
 	std::copy(this->data->begin() + base, this->data->begin() + base + lines, ret.begin());
 	return ret;
+}
+
+int
+Storage::is_access_cleared()
+{
+	int r;
+
+	r = 0;
+	if (this->wait_time == 0) {
+		this->current_request = nullptr;
+		this->wait_time = delay;
+		r = 1;
+	} else {
+		--this->wait_time;
+	}
+
+	return r;
 }

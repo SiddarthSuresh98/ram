@@ -25,42 +25,28 @@ class Dram : public Storage
 	Dram(int delay);
 	~Dram();
 
-	int
-	write_word(void *, signed int, int) override;
-	int
-	write_line(void *, std::array<signed int, LINE_SIZE>, int) override;
-	int
-	read_word(void *, int, signed int &) override;
-	int
-	read_line(void *, int, std::array<signed int, LINE_SIZE> &) override;
+	int write_word(void *, signed int, int) override;
+	int write_line(void *, std::array<signed int, LINE_SIZE>, int) override;
+	int read_word(void *, int, signed int &) override;
+	int read_line(void *, int, std::array<signed int, LINE_SIZE> &) override;
 
 	/**
 	 * TODO This will accept a file at a later date.
 	 */
-	void
-	load(std::vector<signed int> program);
+	void load(std::vector<signed int> program);
 
   private:
 	/**
 	 * Helper for all access methods.
 	 * Calls `request_handler` when `id` is allowed to complete its
 	 * request cycle.
+	 * Handles wait times and setting the current id this storage is serving.
 	 * @param the source making the request
 	 * @param the address to write to
 	 * @param the function to call when an access should be completed
 	 * @return 1 if the access completed successfully, 0 otherwise
 	 */
-	int
-	process(void *id, int address, std::function<void(int line, int word)> request_handler);
-	/**
-	 * Returns OK if `id` is allowed to complete its request this cycle.
-	 * Handles wait times, side door, and setting the current id this
-	 * storage is serving.
-	 * @param the source making the request
-	 * @return 1 if the access can be completed this function call, 0 otherwise
-	 */
-	int
-	is_access_cleared(void *id);
+	int process(void *id, int address, std::function<void(int line, int word)> request_handler);
 	/**
 	 * Given `address`, returns the line and word it is in.
 	 * @param an address

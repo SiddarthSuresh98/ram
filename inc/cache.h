@@ -54,15 +54,7 @@ nn	 * Constructor.
 	 */
 	int process(void *id, int address, std::function<void(int index, int offset)> request_handler);
 	/**
-	 * Returns OK if `id` is allowed to complete its request this cycle.
-	 * Handles cache misses, wait times, and setting the current id this
-	 * storage is serving.
-	 * @param the id asking for a resource
-	 * @return 1 if the access can be carried out this function call, 0 otherwise.
-	 */
-	int is_access_cleared(void *id, int address);
-	/**
-	 * Helper for is_access_cleared.
+	 * Helper for process.
 	 * Fetches `address` from a lower level of storage if it is not already
 	 * present. The victim line is chosen/written back.
 	 * @param the address that must be present in cache.

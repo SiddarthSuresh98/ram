@@ -59,35 +59,24 @@ int
 Cache::process(void *id, int address, std::function<void(int index, int offset)> request_handler)
 {
 	int r;
-	r = this->is_access_cleared(id, address);
-	if (r) {
-		int tag, index, offset;
-		GET_FIELDS(address, &tag, &index, &offset);
-		request_handler(index, offset);
-	}
-	return r;
-}
 
-int
-Cache::is_access_cleared(void *id, int address)
-{
-	/* Do this first--then process the first cycle immediately. */
+	r = 0;
 	if (id == nullptr)
 		throw std::invalid_argument("Accessor cannot be nullptr.");
 	if (this->current_request == nullptr)
 		this->current_request = id;
 	if (this->current_request == id) {
 		if (is_address_missing(address))
-			return 0;
-		else if (this->wait_time == 0) {
-			this->current_request = nullptr;
-			this->wait_time = delay;
-			return 1;
-		} else {
-			--this->wait_time;
-		}
+			r = 0;
+		else
+			r = this->is_access_cleared();
 	}
-	return 0;
+	if (r) {
+		int tag, index, offset;
+		GET_FIELDS(address, &tag, &index, &offset);
+		request_handler(index, offset);
+	}
+	return r;
 }
 
 int
