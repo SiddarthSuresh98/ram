@@ -44,15 +44,7 @@ nn	 * Constructor.
 	int read_word(void *, int, signed int &) override;
 
   private:
-	/**
-	 * Helper for all access methods.
-	 * Calls `request_handler` when `id` is allowed to complete its
-	 * request cycle.
-	 * @param the source making the request
-	 * @param the address to write to
-	 * @param the function to call when an access should be completed
-	 */
-	int process(void *id, int address, std::function<void(int index, int offset)> request_handler);
+	int process(void *id, int address, std::function<void(int index, int offset)> request_handler) override;
 	/**
 	 * Helper for process.
 	 * Fetches `address` from a lower level of storage if it is not already

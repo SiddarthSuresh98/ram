@@ -3,6 +3,7 @@
 #include "definitions.h"
 #include <algorithm>
 #include <array>
+#include <functional>
 #include <map>
 #include <vector>
 
@@ -47,6 +48,23 @@ class Storage
 	std::vector<std::array<signed int, LINE_SIZE>> view(int base, int lines) const;
 
   protected:
+	/**
+	 * Helper for all access methods.
+	 * Calls `request_handler` when `id` is allowed to complete its
+	 * request cycle.
+	 * May include extra checks depending on storage device.
+	 * @param the source making the request
+	 * @param the address to write to
+	 * @param the function to call when an access should be completed
+	 */
+	virtual int
+	process(void *id, int address, std::function<void(int index, int offset)> request_handler) = 0;
+	/**
+	 * Helper for process. Given `id`, returns 0 if the request should trivially be ignored.
+	 * @param the source making the request
+	 * @return 0 if the request should not be completed, 1 if it should be evaluated further.
+	 */
+	int preprocess(void *id);
 	/**
 	 * Returns OK if `id` should complete its request this cycle. In the case it can, automatically
 	 * clears the current requester.

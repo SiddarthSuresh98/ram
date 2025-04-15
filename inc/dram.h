@@ -36,17 +36,7 @@ class Dram : public Storage
 	void load(std::vector<signed int> program);
 
   private:
-	/**
-	 * Helper for all access methods.
-	 * Calls `request_handler` when `id` is allowed to complete its
-	 * request cycle.
-	 * Handles wait times and setting the current id this storage is serving.
-	 * @param the source making the request
-	 * @param the address to write to
-	 * @param the function to call when an access should be completed
-	 * @return 1 if the access completed successfully, 0 otherwise
-	 */
-	int process(void *id, int address, std::function<void(int line, int word)> request_handler);
+	int process(void *id, int address, std::function<void(int line, int word)> request_handler) override;
 	/**
 	 * Given `address`, returns the line and word it is in.
 	 * @param an address

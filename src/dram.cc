@@ -54,13 +54,7 @@ Dram::load(std::vector<signed int> program)
 int
 Dram::process(void *id, int address, std::function<void(int line, int word)> request_handler)
 {
-	if (id == nullptr)
-		throw std::invalid_argument("Accessor cannot be nullptr.");
-
-	if (this->current_request == nullptr)
-		this->current_request = id;
-
-	if (this->current_request != id)
+	if (!preprocess(id))
 		return 0;
 
 	if (!this->is_data_ready())
