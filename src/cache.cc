@@ -58,25 +58,26 @@ Cache::read_word(void *id, int address, signed int &data)
 int
 Cache::process(void *id, int address, std::function<void(int index, int offset)> request_handler)
 {
-	int r;
-
-	r = 0;
 	if (id == nullptr)
 		throw std::invalid_argument("Accessor cannot be nullptr.");
+
 	if (this->current_request == nullptr)
 		this->current_request = id;
-	if (this->current_request == id) {
-		if (is_address_missing(address))
-			r = 0;
-		else
-			r = this->is_access_cleared();
-	}
-	if (r) {
-		int tag, index, offset;
-		GET_FIELDS(address, &tag, &index, &offset);
-		request_handler(index, offset);
-	}
-	return r;
+
+	if (this->current_request != id)
+		return 0;
+
+	if (is_address_missing(address))
+		return 0;
+
+	if (!this->is_data_ready())
+		return 0;
+
+	int tag, index, offset;
+	GET_FIELDS(address, &tag, &index, &offset);
+	request_handler(index, offset);
+
+	return 1;
 }
 
 int

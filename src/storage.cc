@@ -21,7 +21,7 @@ Storage::view(int base, int lines) const
 }
 
 int
-Storage::is_access_cleared()
+Storage::is_data_ready()
 {
 	int r;
 

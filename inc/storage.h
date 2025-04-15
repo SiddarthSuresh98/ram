@@ -53,7 +53,7 @@ class Storage
 	 * @param the id asking for a resource
 	 * @return 1 if the access can be carried out this function call, 0 otherwise.
 	 */
-	int is_access_cleared();
+	int is_data_ready();
 	/**
 	 * The data currently stored in this level of storage.
 	 */
