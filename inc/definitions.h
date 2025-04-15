@@ -20,7 +20,7 @@
  * The number of bits to specify a memory line
  * The total number of lines in memory
  */
-#define MEM_WORD_SPEC 10
+#define MEM_WORD_SPEC 16
 #define MEM_LINE_SPEC static_cast<unsigned int>(MEM_WORD_SPEC - LINE_SPEC)
 #define MEM_WORDS static_cast<int>(pow(2, MEM_WORD_SPEC))
 #define MEM_LINES static_cast<int>(pow(2, MEM_LINE_SPEC))

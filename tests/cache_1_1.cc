@@ -11,7 +11,7 @@ TEST_CASE_METHOD(C11, "store 0th element in DELAY cycles", "[dram]")
 
 	w = 0x11223344;
 	// delay + 1 due to internal logic, when mem
-	// finishes handle_miss still returns 'blocked'
+	// finishes is_address_missing still returns '1'
 	this->wait_then_do(this->m_delay + this->c_delay + 1, [this, w]() {
 		return this->c->write_word(this->mem, w, 0b0);
 	});
@@ -32,7 +32,7 @@ TEST_CASE_METHOD(C11, "store 0th, 1st element in DELAY cycles, with conflict", "
 
 	w = 0x11223344;
 	// delay + 1 due to internal logic, when mem
-	// finishes handle_miss still returns 'blocked'
+	// finishes is_address_missing still returns '1'
 	for (i = 0; i < this->m_delay + this->c_delay + 1; ++i) {
 		r = c->write_word(this->mem, w, 0b0);
 		CHECK(!r);
@@ -72,7 +72,7 @@ TEST_CASE_METHOD(
 
 	w = 0x11223344;
 	// delay + 1 due to internal logic, when mem
-	// finishes handle_miss still returns 'blocked'
+	// finishes is_address_missing still returns '1'
 	this->wait_then_do(this->m_delay + this->c_delay + 1, [this, w]() {
 		return this->c->write_word(this->mem, w, 0b0);
 	});
