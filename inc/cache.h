@@ -55,7 +55,31 @@ nn	 * Constructor.
 	 * @param the address that must be present in cache.
 	 * @param 0 if the address is currently in cache, 1 if it is being fetched.
 	 */
-	int is_address_missing(int address);
+	int priming_address(int address);
+	/**
+	 * Walks the ways in this set of ways. If none of the tags match, returns -1. Otherwise, returns
+	 * the index the matching data is located.
+	 * @param an index aligned to the set of ways in `this->data'
+	 * @param the tag to be matched
+	 * @return -1 if the tag is not present in this set of ways (not in cache), or the true index if
+	 * the tag is present.
+	 */
+	int is_address_missing(int true_index, int tag);
+	/**
+	 * Converts an index into a set of ways into an index into `this->data', which is a
+	 * 1D array. The next `this->ways' entries after the returned index represent the ways in the
+	 * set for this index.
+	 * @param an index to a set of ways
+	 * @param an index aligned to the set of ways in `this->data'
+	 */
+	int get_true_index(int index);
+	/**
+	 * Selects an index into the `data' and `meta' tables for write back using a random replacement
+	 * policy.
+	 * @param an index aligned to the set of ways in `this->data'
+	 * @return an index aligned to the data line selected for eviction
+	 */
+	int get_replacement_index(int index);
 	/**
 	 * The number of bits required to specify a line in this level of cache.
 	 */
