@@ -5,15 +5,6 @@
 #include <functional>
 #include <ostream>
 
-// clang-format off
-/**
- * Ensures address is within the current memory size using a clean wrap.
- * @param an address
- */
-#define WRAP_ADDRESS(a) \
-  ((a < 0) ? ((a % MEM_WORDS) + MEM_WORDS) % MEM_WORDS : a % MEM_WORDS)
-// clang-format on
-
 class Dram : public Storage
 {
   public:
