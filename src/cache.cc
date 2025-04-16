@@ -1,14 +1,20 @@
 #include "cache.h"
 #include "definitions.h"
-#include "utils.h"
-#include <bits/stdc++.h>
+#include <iostream>
 #include <iterator>
 
-Cache::Cache(Storage *lower, int delay) : Storage(delay)
+Cache::Cache(Storage *lower, unsigned int size, unsigned int ways, int delay) : Storage(delay)
 {
-	this->data->resize(L1_CACHE_LINES);
+	int true_size;
+
+	true_size = 1 << size;
+	this->data->resize(true_size);
+	this->meta = std::vector<std::array<signed int, 3>>(true_size, {-1, -1, -1});
 	this->lower = lower;
-	this->meta.fill({-1, -1});
+
+	this->size = size;
+	// store the number of bits which are moved into the tag field
+	this->ways = ways;
 }
 
 Cache::~Cache()
@@ -36,7 +42,6 @@ Cache::write_line(void *id, std::array<signed int, LINE_SIZE> data_line, int add
 	});
 }
 
-// TODO: tests for multi level cache
 int
 Cache::read_line(void *id, int address, std::array<signed int, LINE_SIZE> &data_line)
 {
@@ -56,36 +61,14 @@ Cache::read_word(void *id, int address, signed int &data)
 int
 Cache::process(void *id, int address, std::function<void(int index, int offset)> request_handler)
 {
-	int r;
-	r = this->is_access_cleared(id, address);
-	if (r) {
-		int tag, index, offset;
-		get_cache_fields(address, &tag, &index, &offset);
-		request_handler(index, offset);
-	}
-	return r;
-}
+	if (!preprocess(id) || is_address_missing(address) || !this->is_data_ready())
+		return 0;
 
-int
-Cache::is_access_cleared(void *id, int address)
-{
-	/* Do this first--then process the first cycle immediately. */
-	if (id == nullptr)
-		throw std::invalid_argument("Accessor cannot be nullptr.");
-	if (this->current_request == nullptr)
-		this->current_request = id;
-	if (this->current_request == id) {
-		if (is_address_missing(address))
-			return 0;
-		else if (this->wait_time == 0) {
-			this->current_request = nullptr;
-			this->wait_time = delay;
-			return 1;
-		} else {
-			--this->wait_time;
-		}
-	}
-	return 0;
+	int tag, index, offset;
+	GET_FIELDS(address, &tag, &index, &offset);
+	request_handler(index, offset);
+
+	return 1;
 }
 
 int
@@ -93,9 +76,9 @@ Cache::is_address_missing(int expected)
 {
 	int r, q, tag, index, offset;
 	std::array<signed int, LINE_SIZE> *actual;
-	std::array<int, 2> *meta;
+	std::array<int, 3> *meta;
 
-	get_cache_fields(expected, &tag, &index, &offset);
+	GET_FIELDS(expected, &tag, &index, &offset);
 	r = 0;
 	meta = &this->meta.at(index);
 	actual = &this->data->at(index);
@@ -104,8 +87,7 @@ Cache::is_address_missing(int expected)
 		r = 1;
 		if (meta->at(1) >= 0) {
 			q = this->lower->write_line(
-				this, *actual,
-				((index << LINE_SPEC) + (meta->at(0) << (L1_CACHE_LINE_SPEC + LINE_SPEC))));
+				this, *actual, ((index << LINE_SPEC) + (meta->at(0) << (this->size + LINE_SPEC))));
 			if (q) {
 				meta->at(1) = -1;
 			}
@@ -120,10 +102,12 @@ Cache::is_address_missing(int expected)
 	return r;
 }
 
-std::array<std::array<int, 2>, L1_CACHE_LINES>
-Cache::get_meta() const
-{
-	std::array<std::array<int, 2>, L1_CACHE_LINES> ret;
-	std::copy(std::begin(this->meta), std::end(this->meta), std::begin(ret));
-	return ret;
-}
+// unsigned int
+// Cache::get_true_index(unsigned int index)
+// {
+// }
+
+// unsigned int
+// Cache::get_replacement_index(unsigned int index)
+// {
+// }

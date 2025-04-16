@@ -20,20 +20,10 @@
  * The number of bits to specify a memory line
  * The total number of lines in memory
  */
-#define MEM_WORD_SPEC 10
+#define MEM_WORD_SPEC 16
 #define MEM_LINE_SPEC static_cast<unsigned int>(MEM_WORD_SPEC - LINE_SPEC)
 #define MEM_WORDS static_cast<int>(pow(2, MEM_WORD_SPEC))
 #define MEM_LINES static_cast<int>(pow(2, MEM_LINE_SPEC))
-
-/**
- * The number of bits to specify a l1 cache word
- * The number of bits to specify a l1 cache line
- * The total number of lines in l1 cache
- */
-#define L1_CACHE_WORD_SPEC 7
-#define L1_CACHE_LINE_SPEC                                                     \
-	static_cast<unsigned int>(L1_CACHE_WORD_SPEC - LINE_SPEC)
-#define L1_CACHE_LINES static_cast<int>(pow(2, L1_CACHE_LINE_SPEC))
 
 /**
  * The total number of cycles a memory access takes
@@ -44,42 +34,6 @@
  * The total number of cycles a level one cache access takes
  */
 #define L1_CACHE_DELAY 0
-
-/**
- * The number of general purpose registers
- */
-#define GPR_NUM 16
-
-/**
- * The number of vector registers
- */
-#define V_NUM 8
-
-/**
- * The number of bits to specify an instruction type
- */
-#define TYPE_SIZE 2
-
-/**
- * The number of bits to specify a register
- */
-#define REG_SIZE 5
-
-/**
- * The number of bits to specify an R-Type opcode.
- */
-#define R_OPCODE_SIZE 5
-
-/**
- * The number of bits to specify an opcode.
- */
-#define OPCODE_SIZE 4
-
-/**
- * The maximum value an integer can hold.
- * The minimum is always this number plus one negated.
- */
-#define MAX_INT 2147483647
 
 /**
  * Return the N least-significant bits from integer K using a bit mask

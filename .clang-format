@@ -1,11 +1,12 @@
 ---
 Language: Cpp
+AlwaysBreakAfterDefinitionReturnType: All
 AlignAfterOpenBracket: AlwaysBreak
 AllowAllParametersOfDeclarationOnNextLine: true
 BinPackParameters: false
 BreakBeforeBraces: Linux
 PointerAlignment: Right
-ColumnLimit: 80
+ColumnLimit: 100
 IndentWidth: 4
 TabWidth: 4
 UseTab: Always

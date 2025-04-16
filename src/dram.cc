@@ -4,7 +4,6 @@
 #include <bits/stdc++.h>
 #include <bitset>
 #include <iterator>
-#include <utils.h>
 
 Dram::Dram(int delay) : Storage(delay) { this->data->resize(MEM_LINES); }
 
@@ -25,7 +24,6 @@ Dram::write_word(void *id, signed int data, int address)
 	return process(id, address, [&](int line, int word) { this->data->at(line).at(word) = data; });
 }
 
-// TODO requires testing
 int
 Dram::read_line(void *id, int address, std::array<signed int, LINE_SIZE> &data_line)
 {
@@ -56,32 +54,18 @@ Dram::load(std::vector<signed int> program)
 int
 Dram::process(void *id, int address, std::function<void(int line, int word)> request_handler)
 {
-	int r;
-	r = this->is_access_cleared(id);
-	if (r) {
-		int line, word;
-		get_memory_index(address, line, word);
-		request_handler(line, word);
-	}
-	return r;
+	if (!preprocess(id) || !this->is_data_ready())
+		return 0;
+
+	int line, word;
+	get_memory_index(address, line, word);
+	request_handler(line, word);
+	return 1;
 }
 
-int
-Dram::is_access_cleared(void *id)
+void
+Dram::get_memory_index(int address, int &line, int &word)
 {
-	/* Do this first--then process the first cycle immediately. */
-	if (id == nullptr)
-		throw std::invalid_argument("Accessor cannot be nullptr.");
-	if (this->current_request == nullptr)
-		this->current_request = id;
-	if (this->current_request == id) {
-		if (this->wait_time == 0) {
-			this->current_request = nullptr;
-			this->wait_time = delay;
-			return 1;
-		} else {
-			--this->wait_time;
-		}
-	}
-	return 0;
+	line = WRAP_ADDRESS(address) / LINE_SIZE;
+	word = address % LINE_SIZE;
 }

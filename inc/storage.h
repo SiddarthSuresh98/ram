@@ -3,6 +3,7 @@
 #include "definitions.h"
 #include <algorithm>
 #include <array>
+#include <functional>
 #include <map>
 #include <vector>
 
@@ -24,10 +25,8 @@ class Storage
 	 * @param the address to write to.
 	 * @return 1 if the request was completed, 0 otherwise.
 	 */
-	virtual int
-	write_word(void *id, signed int data, int address) = 0;
-	virtual int
-	write_line(void *id, std::array<signed int, LINE_SIZE> data_line, int address) = 0;
+	virtual int write_word(void *id, signed int data, int address) = 0;
+	virtual int write_line(void *id, std::array<signed int, LINE_SIZE> data_line, int address) = 0;
 
 	/**
 	 * Get the data line at `address`.
@@ -36,10 +35,8 @@ class Storage
 	 * @param the data being returned
 	 * @return 1 if the request was completed, 0 otherwise
 	 */
-	virtual int
-	read_line(void *id, int address, std::array<signed int, LINE_SIZE> &data) = 0;
-	virtual int
-	read_word(void *id, int address, signed int &data) = 0;
+	virtual int read_line(void *id, int address, std::array<signed int, LINE_SIZE> &data) = 0;
+	virtual int read_word(void *id, int address, signed int &data) = 0;
 
 	/**
 	 * Sidedoor view of `lines` of memory starting at `base`.
@@ -48,10 +45,33 @@ class Storage
 	 * @return A matrix of data values, where each row is a line and each column
 	 * is a word.
 	 */
-	std::vector<std::array<signed int, LINE_SIZE>>
-	view(int base, int lines) const;
+	std::vector<std::array<signed int, LINE_SIZE>> view(int base, int lines) const;
 
   protected:
+	/**
+	 * Helper for all access methods.
+	 * Calls `request_handler` when `id` is allowed to complete its
+	 * request cycle.
+	 * May include extra checks depending on storage device.
+	 * @param the source making the request
+	 * @param the address to write to
+	 * @param the function to call when an access should be completed
+	 */
+	virtual int
+	process(void *id, int address, std::function<void(int index, int offset)> request_handler) = 0;
+	/**
+	 * Helper for process. Given `id`, returns 0 if the request should trivially be ignored.
+	 * @param the source making the request
+	 * @return 0 if the request should not be completed, 1 if it should be evaluated further.
+	 */
+	int preprocess(void *id);
+	/**
+	 * Returns OK if `id` should complete its request this cycle. In the case it can, automatically
+	 * clears the current requester.
+	 * @param the id asking for a resource
+	 * @return 1 if the access can be carried out this function call, 0 otherwise.
+	 */
+	int is_data_ready();
 	/**
 	 * The data currently stored in this level of storage.
 	 */
