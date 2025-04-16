@@ -3,15 +3,18 @@
 #include <iostream>
 #include <iterator>
 
-Cache::Cache(Storage *lower, unsigned int size, int delay) : Storage(delay)
+Cache::Cache(Storage *lower, unsigned int size, unsigned int ways, int delay) : Storage(delay)
 {
 	int true_size;
 
 	true_size = 1 << size;
 	this->data->resize(true_size);
-	this->meta = std::vector<std::array<signed int, 2>>(true_size, {-1, -1});
-	this->size = size;
+	this->meta = std::vector<std::array<signed int, 3>>(true_size, {-1, -1, -1});
 	this->lower = lower;
+
+	this->size = size;
+	// store the number of bits which are moved into the tag field
+	this->ways = ways;
 }
 
 Cache::~Cache()
@@ -58,13 +61,7 @@ Cache::read_word(void *id, int address, signed int &data)
 int
 Cache::process(void *id, int address, std::function<void(int index, int offset)> request_handler)
 {
-	if (!preprocess(id))
-		return 0;
-
-	if (is_address_missing(address))
-		return 0;
-
-	if (!this->is_data_ready())
+	if (!preprocess(id) || is_address_missing(address) || !this->is_data_ready())
 		return 0;
 
 	int tag, index, offset;
@@ -79,7 +76,7 @@ Cache::is_address_missing(int expected)
 {
 	int r, q, tag, index, offset;
 	std::array<signed int, LINE_SIZE> *actual;
-	std::array<int, 2> *meta;
+	std::array<int, 3> *meta;
 
 	GET_FIELDS(expected, &tag, &index, &offset);
 	r = 0;
@@ -104,3 +101,13 @@ Cache::is_address_missing(int expected)
 
 	return r;
 }
+
+// unsigned int
+// Cache::get_true_index(unsigned int index)
+// {
+// }
+
+// unsigned int
+// Cache::get_replacement_index(unsigned int index)
+// {
+// }

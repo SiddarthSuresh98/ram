@@ -16,8 +16,8 @@ class C21 : public C11
   public:
 	C21() : C11()
 	{
-		this->c2 = new Cache(new Dram(this->m_delay), 7, this->c_delay);
-		this->c = new Cache(this->c2, 5, this->c_delay);
+		this->c2 = new Cache(new Dram(this->m_delay), 7, 0, this->c_delay);
+		this->c = new Cache(this->c2, 5, 0, this->c_delay);
 	}
 
 	Cache *c2;

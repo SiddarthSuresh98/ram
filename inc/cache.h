@@ -17,8 +17,8 @@
  */
 // clang-format off
 #define GET_FIELDS(a, t, i, o) \
-    *(t) = GET_MID_BITS(a, this->size + LINE_SPEC, MEM_WORD_SPEC); \
-    *(i) = GET_MID_BITS(a, LINE_SPEC, this->size + LINE_SPEC); \
+    *(t) = GET_MID_BITS(a, this->size + LINE_SPEC - this->ways, MEM_WORD_SPEC); \
+    *(i) = GET_MID_BITS(a, LINE_SPEC, this->size + LINE_SPEC - this->ways); \
     *(o) = GET_LS_BITS(a, LINE_SPEC)
 // clang-format on
 
@@ -32,10 +32,12 @@ nn	 * Constructor.
 	 * @param The next lowest level in storage. Methods from this object are
 	 * called in case of a cache miss.
 	 * @param The number of bits required to specify a line in this level of cache.
+	 * @param The number of ways this line of cache uses, or the number of data addresses stored for
+   * certain address index.
 	 * @param The number of clock cycles each access takes.
 	 * @return A new cache object.
 	 */
-	Cache(Storage *lower, unsigned int size, int delay);
+	Cache(Storage *lower, unsigned int size, unsigned int ways, int delay);
 	~Cache();
 
 	int write_word(void *, signed int, int) override;
@@ -44,7 +46,8 @@ nn	 * Constructor.
 	int read_word(void *, int, signed int &) override;
 
   private:
-	int process(void *id, int address, std::function<void(int index, int offset)> request_handler) override;
+	int process(
+		void *id, int address, std::function<void(int index, int offset)> request_handler) override;
 	/**
 	 * Helper for process.
 	 * Fetches `address` from a lower level of storage if it is not already
@@ -58,12 +61,17 @@ nn	 * Constructor.
 	 */
 	unsigned int size;
 	/**
+	 * The number of bits required to specify a way, or the number of data addresses stored for
+	 * certain address index.
+	 */
+	unsigned int ways;
+	/**
 	 * An array of metadata about elements in `data`.
 	 * If the first value of an element is negative, the corresponding
 	 * element in `data` is invalid. If the most second value of an element
 	 * is nonzero, the corresponding element in `data` is dirty.
 	 */
-	std::vector<std::array<signed int, 2>> meta;
+	std::vector<std::array<signed int, 3>> meta;
 };
 
 #endif /* CACHE_H_INCLUDED */

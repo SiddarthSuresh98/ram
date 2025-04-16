@@ -18,7 +18,7 @@ class C11
 		this->c_delay = 2;
 		this->mem = new int();
 		this->fetch = new int();
-		this->c = new Cache(new Dram(this->m_delay), 5, this->c_delay);
+		this->c = new Cache(new Dram(this->m_delay), 5, 0, this->c_delay);
 		this->expected = {0, 0, 0, 0};
 		this->actual = this->c->view(0, 1)[0];
 	}

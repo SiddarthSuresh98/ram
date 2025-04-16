@@ -54,10 +54,7 @@ Dram::load(std::vector<signed int> program)
 int
 Dram::process(void *id, int address, std::function<void(int line, int word)> request_handler)
 {
-	if (!preprocess(id))
-		return 0;
-
-	if (!this->is_data_ready())
+	if (!preprocess(id) || !this->is_data_ready())
 		return 0;
 
 	int line, word;
