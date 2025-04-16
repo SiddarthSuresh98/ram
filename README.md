@@ -1,8 +1,6 @@
 # RAM - RAM Acts Magically
 
-##
-
-This is a cache and memory simulator for a custom ISA nicknamed "RISC V[ECTOR]". It uses a writeback and write allocate on a miss scheme, and supports a configurable number of cache levels and ways, with a least-recently used replacement policy.
+This is a cache and memory simulator for a custom ISA nicknamed "RISC V[ECTOR]". It uses a writeback and write allocate on a miss scheme. It also supports a configurable number of cache levels and ways (allowing creation of a direct mapped or fully associative cache). Additionally, it uses a least-recently used replacement policy.
 
 ## Dependencies
 
