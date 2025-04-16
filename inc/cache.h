@@ -64,7 +64,7 @@ nn	 * Constructor.
 	 * @return -1 if the tag is not present in this set of ways (not in cache), or the true index if
 	 * the tag is present.
 	 */
-	unsigned int is_address_missing(unsigned int true_index, unsigned int tag);
+	int is_address_missing(int true_index, int tag);
 	/**
 	 * Converts an index into a set of ways into an index into `this->data', which is a
 	 * 1D array. The next `this->ways' entries after the returned index represent the ways in the
@@ -72,14 +72,14 @@ nn	 * Constructor.
 	 * @param an index to a set of ways
 	 * @param an index aligned to the set of ways in `this->data'
 	 */
-	unsigned int get_true_index(unsigned int index);
+	int get_true_index(int index);
 	/**
 	 * Selects an index into the `data' and `meta' tables for write back using a random replacement
 	 * policy.
 	 * @param an index aligned to the set of ways in `this->data'
 	 * @return an index aligned to the data line selected for eviction
 	 */
-	unsigned int get_replacement_index(unsigned int index);
+	int get_replacement_index(int index);
 	/**
 	 * The number of bits required to specify a line in this level of cache.
 	 */

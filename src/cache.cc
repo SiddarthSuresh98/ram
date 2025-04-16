@@ -76,7 +76,7 @@ Cache::process(void *id, int address, std::function<void(int index, int offset)>
 int
 Cache::priming_address(int address)
 {
-	unsigned int tag, index, offset;
+	int tag, index, offset;
 	int r1, r2;
 	std::array<signed int, LINE_SIZE> *evict;
 	std::array<int, 3> *meta;
@@ -109,8 +109,8 @@ Cache::priming_address(int address)
 	return r1;
 }
 
-unsigned int
-Cache::is_address_missing(unsigned int index, unsigned int tag)
+int
+Cache::is_address_missing(int index, int tag)
 {
 	int i;
 
@@ -120,14 +120,14 @@ Cache::is_address_missing(unsigned int index, unsigned int tag)
 	return -1;
 }
 
-unsigned int
-Cache::get_true_index(unsigned int index)
+int
+Cache::get_true_index(int index)
 {
 	return index * (1 << this->ways);
 }
 
-unsigned int
-Cache::get_replacement_index(unsigned int index)
+int
+Cache::get_replacement_index(int index)
 {
 	return index + (rand() % (1 << this->ways));
 }
