@@ -1,5 +1,6 @@
 #include "cache.h"
 #include "definitions.h"
+#include <cstdlib>
 #include <iostream>
 #include <iterator>
 
@@ -61,53 +62,72 @@ Cache::read_word(void *id, int address, signed int &data)
 int
 Cache::process(void *id, int address, std::function<void(int index, int offset)> request_handler)
 {
-	if (!preprocess(id) || is_address_missing(address) || !this->is_data_ready())
+	if (!preprocess(id) || priming_address(address) || !this->is_data_ready())
 		return 0;
 
 	int tag, index, offset;
 	GET_FIELDS(address, &tag, &index, &offset);
+	index = this->get_true_index(index);
 	request_handler(index, offset);
 
 	return 1;
 }
 
 int
-Cache::is_address_missing(int expected)
+Cache::priming_address(int address)
 {
-	int r, q, tag, index, offset;
-	std::array<signed int, LINE_SIZE> *actual;
+	unsigned int tag, index, offset;
+	int r1, r2;
+	std::array<signed int, LINE_SIZE> *evict;
 	std::array<int, 3> *meta;
 
-	GET_FIELDS(expected, &tag, &index, &offset);
-	r = 0;
-	meta = &this->meta.at(index);
-	actual = &this->data->at(index);
+	r1 = 0;
+	GET_FIELDS(address, &tag, &index, &offset);
+	index = this->get_true_index(index);
 
-	if (meta->at(0) != tag) {
-		r = 1;
+	if (this->is_address_missing(index, tag)) {
+		r1 = 1;
+
+		index = this->get_replacement_index(index);
+		meta = &this->meta.at(index);
+		evict = &this->data->at(index);
+
+		// handle eviction of dirty cache lines
 		if (meta->at(1) >= 0) {
-			q = this->lower->write_line(
-				this, *actual, ((index << LINE_SPEC) + (meta->at(0) << (this->size + LINE_SPEC))));
-			if (q) {
+			r2 = this->lower->write_line(
+				this, *evict, ((index << LINE_SPEC) + (meta->at(0) << (this->size + LINE_SPEC))));
+			if (r2)
 				meta->at(1) = -1;
-			}
 		} else {
-			q = this->lower->read_line(this, expected, *actual);
-			if (q) {
+			r2 = this->lower->read_line(this, address, *evict);
+			if (r2) {
 				meta->at(0) = tag;
 			}
 		}
 	}
 
-	return r;
+	return r1;
 }
 
-// unsigned int
-// Cache::get_true_index(unsigned int index)
-// {
-// }
+unsigned int
+Cache::is_address_missing(unsigned int index, unsigned int tag)
+{
+	int i;
 
-// unsigned int
-// Cache::get_replacement_index(unsigned int index)
-// {
-// }
+	for (i = 0; i < (1 << this->ways); ++i)
+		if (this->meta.at(index + i).at(0) == tag)
+			return i;
+	return -1;
+}
+
+unsigned int
+Cache::get_true_index(unsigned int index)
+{
+	return index * (1 << this->ways);
+}
+
+unsigned int
+Cache::get_replacement_index(unsigned int index)
+{
+	return index + (rand() % (1 << this->ways));
+}
