@@ -44,6 +44,7 @@ nn	 * Constructor.
 	int write_line(void *, std::array<signed int, LINE_SIZE>, int) override;
 	int read_line(void *, int, std::array<signed int, LINE_SIZE> &) override;
 	int read_word(void *, int, signed int &) override;
+	unsigned int get_size();
 
   private:
 	int process(
