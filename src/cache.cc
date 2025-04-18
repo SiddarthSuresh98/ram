@@ -62,6 +62,7 @@ Cache::read_word(void *id, int address, signed int &data)
 int
 Cache::process(void *id, int address, std::function<void(int index, int offset)> request_handler)
 {
+	address = WRAP_ADDRESS(address);
 	if (!preprocess(id) || priming_address(address) || !this->is_data_ready())
 		return 0;
 
