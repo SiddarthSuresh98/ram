@@ -31,11 +31,6 @@
 #define MEM_DELAY 3
 
 /**
- * The total number of cycles a level one cache access takes
- */
-#define L1_CACHE_DELAY 0
-
-/**
  * Return the N least-significant bits from integer K using a bit mask
  * @param the integer to be parsed
  * @param the number of bits to be parsed
