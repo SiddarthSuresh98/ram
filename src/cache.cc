@@ -41,6 +41,9 @@ Cache::~Cache()
 	delete this->data;
 }
 
+unsigned int
+Cache::get_size() { return this->size; }
+
 int
 Cache::write_word(void *id, signed int data, int address)
 {
