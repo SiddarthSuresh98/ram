@@ -1,5 +1,5 @@
 #ifndef C11_H
-#define C11_HH
+#define C11_H
 
 #include "cache.h"
 #include "dram.h"
