@@ -1,3 +1,6 @@
+#ifndef C11_H
+#define C11_HH
+
 #include "cache.h"
 #include "dram.h"
 #include "storage.h"
@@ -52,3 +55,5 @@ class C11
 	std::array<signed int, LINE_SIZE> expected;
 	std::array<signed int, LINE_SIZE> actual;
 };
+
+#endif /* C11_H_INCLUDED */
