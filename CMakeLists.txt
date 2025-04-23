@@ -27,7 +27,7 @@ if(RAM_TESTS)
 
 	# test executable
 	add_executable(tests ${SRCS} ${TESTS})
-	target_include_directories(tests PRIVATE ${PROJECT_SOURCE_DIR}/inc ${PROJECT_SOURCE_DIR}/inc)
+	target_include_directories(tests PRIVATE ${PROJECT_SOURCE_DIR}/inc)
 	target_link_libraries(tests PRIVATE Catch2::Catch2WithMain PRIVATE)
 
 	# test discovery
