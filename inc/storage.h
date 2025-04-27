@@ -65,13 +65,9 @@ class Storage
 	virtual int read_word(void *id, int address, signed int &data) = 0;
 
 	/**
-	 * Sidedoor view of `lines` of memory starting at `base`.
-	 * @param The base line to start getting memory from.
-	 * @param The amount of lines to fetch.
-	 * @return A matrix of data values, where each row is a line and each column
-	 * is a word.
+	 * @return a copy of `this->data'
 	 */
-	std::vector<std::array<signed int, LINE_SIZE>> view(int base, int lines) const;
+	std::vector<std::array<signed int, LINE_SIZE>> get_data() const;
 
   protected:
 	/**

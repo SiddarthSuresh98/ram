@@ -12,7 +12,7 @@ class D
 		this->mem = new int;
 		this->fetch = new int;
 		this->expected = {0, 0, 0, 0};
-		this->actual = this->d->view(0, 1)[0];
+		this->actual = this->d->get_data()[0];
 	}
 
 	~D()
@@ -31,7 +31,7 @@ class D
 			// check response
 			CHECK(!r);
 			// check for early modifications
-			actual = d->view(0, 1)[0];
+			actual = d->get_data()[0];
 			REQUIRE(this->expected == this->actual);
 		}
 	}
@@ -58,7 +58,7 @@ TEST_CASE_METHOD(D, "store 0th element in DELAY cycles", "[dram]")
 
 	CHECK(r);
 	expected.at(0) = w;
-	actual = this->d->view(0, 1)[0];
+	actual = this->d->get_data()[0];
 	REQUIRE(expected == actual);
 }
 
@@ -76,7 +76,7 @@ TEST_CASE_METHOD(D, "store 0th, 1st element in DELAY cycles, no conflict", "[dra
 	REQUIRE(r);
 
 	expected.at(0) = w;
-	actual = d->view(0, 1)[0];
+	actual = d->get_data()[0];
 	REQUIRE(expected == actual);
 
 	this->wait_for_storage(
@@ -85,7 +85,7 @@ TEST_CASE_METHOD(D, "store 0th, 1st element in DELAY cycles, no conflict", "[dra
 	r = d->write_word(this->fetch, w, 0x1);
 	CHECK(r);
 
-	actual = d->view(0, 1)[0];
+	actual = d->get_data()[0];
 	expected.at(1) = w;
 	REQUIRE(expected == actual);
 }
@@ -104,7 +104,7 @@ TEST_CASE_METHOD(D, "store 0th element in DELAY cycles with conflict", "[dram]")
 		CHECK(!r);
 
 		// check for early modifications
-		actual = d->view(0, 1)[0];
+		actual = d->get_data()[0];
 		REQUIRE(expected == actual);
 	}
 
@@ -112,7 +112,7 @@ TEST_CASE_METHOD(D, "store 0th element in DELAY cycles with conflict", "[dram]")
 	REQUIRE(r);
 
 	expected.at(0) = w;
-	actual = d->view(0, 1)[0];
+	actual = d->get_data()[0];
 	REQUIRE(expected == actual);
 
 	this->wait_for_storage(
@@ -121,7 +121,7 @@ TEST_CASE_METHOD(D, "store 0th element in DELAY cycles with conflict", "[dram]")
 	r = d->write_word(this->fetch, w, 0x1);
 	CHECK(r);
 
-	actual = d->view(0, 1)[0];
+	actual = d->get_data()[0];
 	expected.at(1) = w;
 	REQUIRE(expected == actual);
 }
@@ -141,7 +141,7 @@ TEST_CASE_METHOD(D, "store line in DELAY cycles", "[dram]")
 	r = d->write_line(this->mem, buffer, 0x0);
 	CHECK(r);
 
-	actual = d->view(0, 1)[0];
+	actual = d->get_data()[0];
 	expected = buffer;
 	REQUIRE(expected == actual);
 }
@@ -162,7 +162,7 @@ TEST_CASE_METHOD(D, "store line in DELAY cycles no conflict", "[dram]")
 	REQUIRE(r);
 
 	expected = buffer;
-	actual = d->view(0, 1)[0];
+	actual = d->get_data()[0];
 	REQUIRE(expected == actual);
 
 	buffer = {w + 4, w + 5, w + 6, w + 7};
@@ -173,7 +173,7 @@ TEST_CASE_METHOD(D, "store line in DELAY cycles no conflict", "[dram]")
 	CHECK(r);
 
 	expected = buffer;
-	actual = d->view(0, 1)[0];
+	actual = d->get_data()[0];
 	REQUIRE(expected == actual);
 }
 
@@ -193,14 +193,14 @@ TEST_CASE_METHOD(D, "store line in DELAY cycles with conflict", "[dram]")
 		CHECK(!r);
 
 		// check for early modifications
-		actual = d->view(0, 1)[0];
+		actual = d->get_data()[0];
 		REQUIRE(expected == actual);
 	}
 
 	r = d->write_line(this->mem, buffer, 0x0);
 	CHECK(r);
 
-	actual = d->view(0, 1)[0];
+	actual = d->get_data()[0];
 	expected = buffer;
 	REQUIRE(expected == actual);
 
@@ -212,7 +212,7 @@ TEST_CASE_METHOD(D, "store line in DELAY cycles with conflict", "[dram]")
 	CHECK(r);
 
 	expected = buffer;
-	actual = d->view(0, 1)[0];
+	actual = d->get_data()[0];
 	REQUIRE(expected == actual);
 }
 
@@ -299,7 +299,7 @@ TEST_CASE_METHOD(
 	r = d->write_line(this->mem, expected, addr);
 	CHECK(r);
 
-	actual = d->view(0, 1)[0];
+	actual = d->get_data()[0];
 	REQUIRE(expected == actual);
 
 	for (i = 0; i < LINE_SIZE; ++i) {

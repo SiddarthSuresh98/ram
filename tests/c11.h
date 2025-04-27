@@ -23,7 +23,7 @@ class C11
 		this->fetch = new int();
 		this->c = new Cache(new Dram(this->m_delay), 5, 0, this->c_delay);
 		this->expected = {0, 0, 0, 0};
-		this->actual = this->c->view(0, 1)[0];
+		this->actual = this->c->get_data()[0];
 	}
 
 	~C11()
@@ -42,7 +42,7 @@ class C11
 			// check response
 			CHECK(!r);
 			// check for early modifications
-			actual = c->view(0, 1)[0];
+			actual = c->get_data()[0];
 			REQUIRE(this->expected == this->actual);
 		}
 	}
