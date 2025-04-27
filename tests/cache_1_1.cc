@@ -20,7 +20,7 @@ TEST_CASE_METHOD(C11, "store 0th element in DELAY cycles", "[dram]")
 	CHECK(r);
 
 	expected.at(0) = w;
-	actual = c->view(0, 1)[0];
+	actual = c->get_data()[0];
 	REQUIRE(expected == actual);
 }
 
@@ -40,7 +40,7 @@ TEST_CASE_METHOD(C11, "store 0th, 1st element in DELAY cycles, with conflict", "
 		CHECK(!r);
 
 		// check for early modifications
-		actual = c->view(0, 1)[0];
+		actual = c->get_data()[0];
 		REQUIRE(this->expected == this->actual);
 	}
 
@@ -48,7 +48,7 @@ TEST_CASE_METHOD(C11, "store 0th, 1st element in DELAY cycles, with conflict", "
 	CHECK(r);
 
 	expected.at(0) = w;
-	actual = c->view(0, 1)[0];
+	actual = c->get_data()[0];
 	REQUIRE(expected == actual);
 
 	// this should have been loaded already!
@@ -59,7 +59,7 @@ TEST_CASE_METHOD(C11, "store 0th, 1st element in DELAY cycles, with conflict", "
 	CHECK(r);
 
 	expected.at(1) = w;
-	actual = c->view(0, 1)[0];
+	actual = c->get_data()[0];
 	REQUIRE(expected == actual);
 }
 
@@ -81,7 +81,7 @@ TEST_CASE_METHOD(
 	CHECK(r);
 
 	expected.at(0) = w;
-	actual = c->view(0, 1)[0];
+	actual = c->get_data()[0];
 	REQUIRE(expected == actual);
 
 	// write back to memory
@@ -95,7 +95,7 @@ TEST_CASE_METHOD(
 	CHECK(r);
 
 	expected.at(0) = 0;
-	actual = c->view(0, 1)[0];
+	actual = c->get_data()[0];
 	CHECK(expected == actual);
 
 	this->wait_then_do(
@@ -106,6 +106,6 @@ TEST_CASE_METHOD(
 
 	expected.at(0) = 0;
 	expected.at(1) = w;
-	actual = c->view(0, 1)[0];
+	actual = c->get_data()[0];
 	REQUIRE(expected == actual);
 }

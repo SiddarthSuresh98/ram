@@ -43,12 +43,12 @@ TEST_CASE_METHOD(C21, "store 32th, 96th element in DELAY cycles, evict to level 
 
 	// check level 2
 	// note this is write-back == no write
-	actual = this->c2->view(32, 1)[0];
+	actual = this->c2->get_data()[32];
 	REQUIRE(expected == actual);
 
 	// check level 1
 	expected.at(0) = w;
-	actual = this->c->view(0, 1)[0];
+	actual = this->c->get_data()[0];
 	REQUIRE(expected == actual);
 
 	// wait = evict
@@ -57,7 +57,7 @@ TEST_CASE_METHOD(C21, "store 32th, 96th element in DELAY cycles, evict to level 
 	});
 
 	// check level 2
-	actual = this->c2->view(32, 1)[0];
+	actual = this->c2->get_data()[32];
 	REQUIRE(expected == actual);
 
 	// read in line
@@ -75,13 +75,13 @@ TEST_CASE_METHOD(C21, "store 32th, 96th element in DELAY cycles, evict to level 
 	CHECK(r);
 
 	// check level 2
-	actual = this->c2->view(96, 1)[0];
+	actual = this->c2->get_data()[96];
 	REQUIRE(expected == actual);
 	expected.at(0) = w;
-	actual = this->c2->view(32, 1)[0];
+	actual = this->c2->get_data()[32];
 	REQUIRE(expected == actual);
 
 	// check level 1
-	actual = this->c->view(0, 1)[0];
+	actual = this->c->get_data()[0];
 	REQUIRE(expected == actual);
 }
