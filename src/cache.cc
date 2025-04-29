@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <iterator>
+#include <limits.h>
 
 Cache::Cache(Storage *lower, unsigned int size, unsigned int ways, int delay) : Storage(delay)
 {
@@ -33,6 +34,7 @@ Cache::Cache(Storage *lower, unsigned int size, unsigned int ways, int delay) : 
 	this->size = size;
 	// store the number of bits which are moved into the tag field
 	this->ways = ways;
+	this->access_num = 0;
 }
 
 Cache::~Cache()
@@ -87,9 +89,15 @@ Cache::process(void *id, int address, std::function<void(int index, int offset)>
 		return 0;
 
 	int tag, index, offset;
+	std::array<int, 3> *meta;
+
 	GET_FIELDS(address, &tag, &index, &offset);
-	index = this->get_true_index(index);
+	index = this->search_ways_for(index, tag);
 	request_handler(index, offset);
+	// set usage status
+	meta = &this->meta.at(index);
+	meta->at(2) = (this->access_num % INT_MAX);
+	++this->access_num;
 
 	return 1;
 }
@@ -97,26 +105,25 @@ Cache::process(void *id, int address, std::function<void(int index, int offset)>
 int
 Cache::priming_address(int address)
 {
-	int tag, index, offset;
+	int tag, index, offset, t_index;
 	int r1, r2;
 	std::array<signed int, LINE_SIZE> *evict;
 	std::array<int, 3> *meta;
 
 	r1 = 0;
 	GET_FIELDS(address, &tag, &index, &offset);
-	index = this->get_true_index(index);
+	t_index = this->search_ways_for(index, tag);
+	meta = &this->meta.at(t_index);
 
-	if (this->is_address_missing(index, tag)) {
+	if (meta->at(0) != tag) {
 		r1 = 1;
 
-		index = this->get_replacement_index(index);
-		meta = &this->meta.at(index);
-		evict = &this->data->at(index);
+		evict = &this->data->at(t_index);
 
 		// handle eviction of dirty cache lines
 		if (meta->at(1) >= 0) {
 			r2 = this->lower->write_line(
-				this, *evict, ((index << LINE_SPEC) + (meta->at(0) << (this->size + LINE_SPEC))));
+				this, *evict, ((index << LINE_SPEC) + (meta->at(0) << (this->size - this->ways + LINE_SPEC))));
 			if (r2)
 				meta->at(1) = -1;
 		} else {
@@ -131,24 +138,18 @@ Cache::priming_address(int address)
 }
 
 int
-Cache::is_address_missing(int index, int tag)
+Cache::search_ways_for(int index, int tag)
 {
-	int i;
+	int i, r;
+
+	index = index * (1 << this->ways);
+	r = INT_MAX;
 
 	for (i = 0; i < (1 << this->ways); ++i)
 		if (this->meta.at(index + i).at(0) == tag)
-			return i;
-	return -1;
-}
-
-int
-Cache::get_true_index(int index)
-{
-	return index * (1 << this->ways);
-}
-
-int
-Cache::get_replacement_index(int index)
-{
-	return index + (rand() % (1 << this->ways));
+			return i + index;
+	for (i = 0; i < (1 << this->ways); ++i)
+		if (this->meta.at(index + i).at(2) < r)
+			r = i;
+	return r + index;
 }
