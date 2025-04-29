@@ -43,11 +43,6 @@
 #define MEM_LINES static_cast<int>(pow(2, MEM_LINE_SPEC))
 
 /**
- * The total number of cycles a memory access takes
- */
-#define MEM_DELAY 3
-
-/**
  * Return the N least-significant bits from integer K using a bit mask
  * @param the integer to be parsed
  * @param the number of bits to be parsed

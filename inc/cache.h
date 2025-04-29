@@ -75,29 +75,14 @@ nn	 * Constructor.
 	 */
 	int priming_address(int address);
 	/**
-	 * Walks the ways in this set of ways. If none of the tags match, returns -1. Otherwise, returns
-	 * the index the matching data is located.
+	 * Searches the set of ways in cache belonging to `index' for `tag'. If a match is found,
+	 * returns the true index into the table. If a match is not found, returns a address suitable to
+	 * replace, dictated by the LRU replacement policy..
 	 * @param an index aligned to the set of ways in `this->data'
 	 * @param the tag to be matched
-	 * @return -1 if the tag is not present in this set of ways (not in cache), or the true index if
-	 * the tag is present.
+	 * @return the true index if the tag is present, or the index to be replaced if not.
 	 */
-	int is_address_missing(int true_index, int tag);
-	/**
-	 * Converts an index into a set of ways into an index into `this->data', which is a
-	 * 1D array. The next `this->ways' entries after the returned index represent the ways in the
-	 * set for this index.
-	 * @param an index to a set of ways
-	 * @param an index aligned to the set of ways in `this->data'
-	 */
-	int get_true_index(int index);
-	/**
-	 * Selects an index into the `data' and `meta' tables for write back using a random replacement
-	 * policy.
-	 * @param an index aligned to the set of ways in `this->data'
-	 * @return an index aligned to the data line selected for eviction
-	 */
-	int get_replacement_index(int index);
+	int search_ways_for(int true_index, int tag);
 	/**
 	 * The number of bits required to specify a line in this level of cache.
 	 */
@@ -107,6 +92,10 @@ nn	 * Constructor.
 	 * certain address index.
 	 */
 	unsigned int ways;
+	/**
+	 * The current access number. Used to assign usage data for the LRU replacement policy.
+	 */
+	unsigned int access_num;
 	/**
 	 * An array of metadata about elements in `data`.
 	 * If the first value of an element is negative, the corresponding
